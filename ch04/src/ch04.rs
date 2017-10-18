@@ -26,11 +26,10 @@ type Integer = u32;
 
 // Section 4.2
 
-/*
-fn odd(n: u32) -> bool {
+fn _odd(n: u32) -> bool {
     n & 0x1 == 1
 }
-*/
+
 fn half(n: u32) -> u32 {
     n >> 1
 }
@@ -95,8 +94,7 @@ pub fn fast_segment_gcm(mut a: LineSegment, mut b: LineSegment) -> LineSegment {
 
 // Section 4.5
 
-/*
-pub fn fast_segment_remainder1(mut a: LineSegment, b: LineSegment) -> LineSegment {
+pub fn _fast_segment_remainder1(mut a: LineSegment, b: LineSegment) -> LineSegment {
     // precondition: b != 0
     if a < b {
         return a;
@@ -104,13 +102,12 @@ pub fn fast_segment_remainder1(mut a: LineSegment, b: LineSegment) -> LineSegmen
     if a - b < b {
         return a - b;
     }
-    a = fast_segment_remainder1(a, b + b);
+    a = _fast_segment_remainder1(a, b + b);
     if a < b {
         return a;
     }
     a - b
 }
-*/
 
 fn largest_doubling(a: LineSegment, mut b: LineSegment) -> LineSegment {
     // precondition: b != 0
