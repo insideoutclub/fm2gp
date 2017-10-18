@@ -1,0 +1,8 @@
+[package]
+name = "ch11"
+version = "0.1.0"
+authors = ["sandersd"]
+
+[dependencies]
+num-integer = "0.1.35"
+num-traits = "0.1.40"
