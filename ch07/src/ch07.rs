@@ -23,19 +23,19 @@ extern crate num_integer;
 extern crate num_traits;
 extern crate std;
 
+pub trait Integer: num_integer::Integer + num_traits::One {}
+
+impl Integer for i32 {}
+
 // Section 7.1
 
-fn odd<N>(n: &N) -> bool
-where
-    N: num_integer::Integer,
-{
+fn odd<N: Integer>(n: &N) -> bool {
     n.is_odd()
 }
 
-fn half<N>(n: &N) -> N
+fn half<N: Integer>(n: &N) -> N
 where
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
-    N: num_traits::One,
 {
     n >> num_traits::one()
 }
@@ -55,7 +55,7 @@ pub fn mult_acc4(mut r: i32, mut n: i32, mut a: i32) -> i32 {
 
 pub fn multiply_accumulate0<A, N>(mut r: A, mut n: N, mut a: A) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
 {
@@ -76,7 +76,7 @@ where
 
 pub fn multiply_accumulate<A, N>(mut r: A, mut n: N, mut a: A) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
 {
@@ -95,7 +95,7 @@ where
 
 pub fn multiply_accumulate_semigroup<A, N>(mut r: A, mut n: N, mut a: A) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
 {
@@ -117,7 +117,7 @@ where
 
 pub fn multiply_semigroup<A, N>(mut n: N, mut a: A) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
 {
@@ -138,7 +138,7 @@ where
 
 pub fn multiply_monoid<A, N>(n: N, a: A) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
     A: num_traits::Zero,
@@ -152,7 +152,7 @@ where
 
 pub fn multiply_group<A, N>(mut n: N, mut a: A) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     N: num_traits::Signed,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
@@ -170,7 +170,7 @@ where
 
 pub fn power_accumulate_semigroup<A, N>(mut r: A, mut a: A, mut n: N) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
     for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
 {
@@ -192,7 +192,7 @@ where
 
 pub fn power_semigroup<A, N>(mut a: A, mut n: N) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
     for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
 {
@@ -210,7 +210,7 @@ where
 
 pub fn power_monoid<A, N>(a: A, n: N) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
     for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
     A: num_traits::One,
@@ -232,7 +232,7 @@ where
 
 pub fn power_group<A, N>(mut a: A, mut n: N) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
     N: num_traits::Signed,
     for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
@@ -248,11 +248,15 @@ where
 
 // Section 7.6
 
+pub trait SemigroupOperation<A> {
+    fn apply(&self, x: &A, y: &A) -> A;
+}
+
 pub fn power_accumulate_semigroup_with_op<A, N, Op>(mut r: A, mut a: A, mut n: N, op: &Op) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
-    Op: Fn(&A, &A) -> A,
+    Op: SemigroupOperation<A>,
 {
     // precondition(n >= 0);
     if n.is_zero() {
@@ -260,66 +264,67 @@ where
     }
     loop {
         if odd(&n) {
-            r = op(&r, &a);
+            r = op.apply(&r, &a);
             if n == num_traits::one() {
                 return r;
             }
         }
         n = half(&n);
-        a = op(&a, &a);
+        a = op.apply(&a, &a);
     }
 }
 
 pub fn power_semigroup_with_op<A, N, Op>(mut a: A, mut n: N, op: &Op) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
-    Op: Fn(&A, &A) -> A,
+    Op: SemigroupOperation<A>,
 {
     // precondition(n > 0);
     while !odd(&n) {
-        a = op(&a, &a);
+        a = op.apply(&a, &a);
         n = half(&n);
     }
     if n == num_traits::one() {
         return a;
     }
-    let twice_a = op(&a, &a);
-    power_accumulate_semigroup_with_op(a, twice_a, half(&(n - num_traits::one())), &op)
+    let twice_a = op.apply(&a, &a);
+    power_accumulate_semigroup_with_op(a, twice_a, half(&(n - num_traits::one())), op)
 }
 
-pub fn power_monoid_with_op<A, N, Op>(a: A, n: N, op: &Op, identity_element: A) -> A
+pub trait MonoidOperation<A>: SemigroupOperation<A> {
+    fn identity_element(&self) -> A;
+}
+
+pub fn power_monoid_with_op<A, N, Op>(a: A, n: N, op: &Op) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
-    Op: Fn(&A, &A) -> A,
+    Op: MonoidOperation<A>,
 {
     // precondition(n >= 0);
     if n.is_zero() {
-        return identity_element;
+        return op.identity_element();
     }
     power_semigroup_with_op(a, n, op)
 }
 
-pub fn power_group_with_op<A, N, Op, InverseOp>(
-    mut a: A,
-    mut n: N,
-    op: &Op,
-    inverse_operation: &InverseOp,
-    identity_element: A,
-) -> A
+pub trait GroupOperation<A>: MonoidOperation<A> {
+    fn inverse_operation(&self, &A) -> A;
+}
+
+pub fn power_group_with_op<A, N, Op>(mut a: A, mut n: N, op: &Op) -> A
 where
-    N: num_integer::Integer,
+    N: Integer,
     for<'a> &'a N: std::ops::Shr<N, Output = N>,
     N: num_traits::Signed,
-    Op: Fn(&A, &A) -> A,
-    InverseOp: Fn(&A) -> A,
+    Op: GroupOperation<A>,
 {
     if n.is_negative() {
         n = -n;
-        a = inverse_operation(&a);
+        a = op.inverse_operation(&a);
     }
-    power_monoid_with_op(a, n, op, identity_element)
+    power_monoid_with_op(a, n, op)
 }
 
 

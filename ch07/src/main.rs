@@ -16,11 +16,45 @@
 //	Addison-Wesley Professional, 2015
 //
 // -------------------------------------------------------------------
-// ch07.cpp -- For testing functions from Chapter 7 of fM2GP.
+// main.rs -- For testing functions from Chapter 7 of fM2GP.
 // -------------------------------------------------------------------
 
 mod ch07;
 use ch07::*;
+extern crate num_traits;
+use ch07::MonoidOperation;
+
+struct Plus();
+
+impl<A> SemigroupOperation<A> for Plus
+where
+    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
+{
+    fn apply(&self, x: &A, y: &A) -> A {
+        x + y
+    }
+}
+
+impl<A> MonoidOperation<A> for Plus
+where
+    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
+    A: num_traits::Zero,
+{
+    fn identity_element(&self) -> A {
+        num_traits::zero()
+    }
+}
+
+impl<A> GroupOperation<A> for Plus
+where
+    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
+    A: num_traits::Zero,
+    for<'a> &'a A: std::ops::Neg<Output = A>,
+{
+    fn inverse_operation(&self, x: &A) -> A {
+        -x
+    }
+}
 
 fn main() {
     println!("mult_acc4(0, 7, 8) = {}", mult_acc4(0, 7, 8));
@@ -47,7 +81,7 @@ fn main() {
     println!("power_monoid(2, 10) = {}", power_monoid(2, 10));
     println!("power_monoid(2, 0) = {}", power_monoid(2, 0));
     println!("power_group(2., -10) = {}", power_group(2., -10));
-    let plus_int = |x: &i32, y: &i32| x + y;
+    let plus_int = Plus();
     println!(
         "power_accumulate_semigroup(0, 7, 8, plus_int) = {}",
         power_accumulate_semigroup_with_op(0, 7, 8, &plus_int)
@@ -58,12 +92,11 @@ fn main() {
     );
     println!(
         "power_monoid(0, 8, plus_int) = {}",
-        power_monoid_with_op(0, 8, &plus_int, 0)
+        power_monoid_with_op(0, 8, &plus_int)
     );
-    let negate = |x: &i32| -x;
     println!(
         "power_group(7, -8, plus_int) = {}",
-        power_group_with_op(7, -8, &plus_int, &negate, 0)
+        power_group_with_op(7, -8, &plus_int)
     );
     println!("fib0(5) = {}", fib0(5));
     println!("fibonacci_iterative(5) = {}", fibonacci_iterative(5));
