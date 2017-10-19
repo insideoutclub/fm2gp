@@ -53,14 +53,14 @@ where
 
 pub trait Regular
 where
-    Self: std::cmp::PartialEq,
     Self: Clone,
+    Self: std::cmp::PartialEq,
     Self: std::cmp::PartialOrd,
 {
 }
 
 pub trait SemigroupOperation<A> {
-    fn apply(&self, &A, &A) -> A;
+    fn call(&self, &A, &A) -> A;
 }
 
 pub trait MonoidOperation<A>
@@ -313,7 +313,7 @@ impl<A> SemigroupOperation<A> for Plus
 where
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
 {
-    fn apply(&self, x: &A, y: &A) -> A {
+    fn call(&self, x: &A, y: &A) -> A {
         x + y
     }
 }
@@ -324,7 +324,7 @@ impl<A> SemigroupOperation<A> for _Multiplies
 where
     for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
 {
-    fn apply(&self, x: &A, y: &A) -> A {
+    fn call(&self, x: &A, y: &A) -> A {
         x * y
     }
 }
@@ -341,13 +341,13 @@ pub fn power_accumulate_semigroup_with_op<A: Regular, N: Integer, Op: SemigroupO
     }
     loop {
         if odd(&n) {
-            r = op.apply(&r, &a);
+            r = op.call(&r, &a);
             if n == num_traits::one() {
                 return r;
             }
         }
         n = half(n);
-        a = op.apply(&a, &a);
+        a = op.call(&a, &a);
     }
 }
 
@@ -358,13 +358,13 @@ pub fn power_semigroup_with_op<A: Regular, N: Integer, Op: SemigroupOperation<A>
 ) -> A {
     // precondition(n > 0);
     while !odd(&n) {
-        a = op.apply(&a, &a);
+        a = op.call(&a, &a);
         n = half(n);
     }
     if n == num_traits::one() {
         return a;
     }
-    let twice_a = op.apply(&a, &a);
+    let twice_a = op.call(&a, &a);
     power_accumulate_semigroup_with_op(a, twice_a, half(n - num_traits::one()), op)
 }
 
