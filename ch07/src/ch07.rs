@@ -26,16 +26,14 @@ extern crate std;
 pub trait Integer
 where
     Self: num_integer::Integer,
-    Self: num_traits::One,
-    Self: std::ops::Sub<Self, Output = Self>,
+    Self: std::ops::Shr<Self, Output = Self>,
 {
-    fn half(&self) -> Self;
 }
 
-impl Integer for i32 {
-    fn half(&self) -> i32 {
-        self >> 1
-    }
+impl Integer for i32 {}
+
+fn half<N: Integer>(n: N) -> N {
+    n >> num_traits::one()
 }
 
 // Section 7.1
@@ -49,7 +47,7 @@ pub fn mult_acc4(mut r: i32, mut n: i32, mut a: i32) -> i32 {
                 return r;
             }
         }
-        n = n.half();
+        n = half(n);
         a += a;
     }
 }
@@ -65,7 +63,7 @@ where
                 return r;
             }
         }
-        n = n.half();
+        n = half(n);
         a = &a + &a;
     }
 }
@@ -84,7 +82,7 @@ where
                 return r;
             }
         }
-        n = n.half();
+        n = half(n);
         a = &a + &a;
     }
 }
@@ -105,7 +103,7 @@ where
                 return r;
             }
         }
-        n = n.half();
+        n = half(n);
         a = &a + &a;
     }
 }
@@ -117,13 +115,13 @@ where
     // precondition(n > 0);
     while !n.is_odd() {
         a = &a + &a;
-        n = n.half();
+        n = half(n);
     }
     if n == num_traits::one() {
         return a;
     }
     let twice_a = &a + &a;
-    multiply_accumulate_semigroup(a, (n - num_traits::one()).half(), twice_a)
+    multiply_accumulate_semigroup(a, half(n - num_traits::one()), twice_a)
 }
 
 
@@ -172,7 +170,7 @@ where
                 return r;
             }
         }
-        n = n.half();
+        n = half(n);
         a = &a * &a;
     }
 }
@@ -184,13 +182,13 @@ where
     // precondition(n > 0);
     while !n.is_odd() {
         a = &a * &a;
-        n = n.half();
+        n = half(n);
     }
     if n == num_traits::one() {
         return a;
     }
     let a_squared = &a * &a;
-    power_accumulate_semigroup(a, a_squared, (n - num_traits::one()).half())
+    power_accumulate_semigroup(a, a_squared, half(n - num_traits::one()))
 }
 
 pub fn power_monoid<A, N: Integer>(a: A, n: N) -> A
@@ -253,7 +251,7 @@ where
                 return r;
             }
         }
-        n = n.half();
+        n = half(n);
         a = op.apply(&a, &a);
     }
 }
@@ -265,13 +263,13 @@ where
     // precondition(n > 0);
     while !n.is_odd() {
         a = op.apply(&a, &a);
-        n = n.half();
+        n = half(n);
     }
     if n == num_traits::one() {
         return a;
     }
     let twice_a = op.apply(&a, &a);
-    power_accumulate_semigroup_with_op(a, twice_a, (n - num_traits::one()).half(), op)
+    power_accumulate_semigroup_with_op(a, twice_a, half(n - num_traits::one()), op)
 }
 
 pub trait MonoidOperation<A>: SemigroupOperation<A> {
