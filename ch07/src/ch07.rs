@@ -291,6 +291,17 @@ where
     }
 }
 
+pub struct _Multiplies();
+
+impl<A> SemigroupOperation<A> for _Multiplies
+where
+    for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
+{
+    fn apply(&self, x: &A, y: &A) -> A {
+        x * y
+    }
+}
+
 pub fn power_accumulate_semigroup_with_op<A, N: Integer, Op: SemigroupOperation<A>>(
     mut r: A,
     mut a: A,
@@ -330,31 +341,27 @@ pub fn power_semigroup_with_op<A, N: Integer, Op: SemigroupOperation<A>>(
     power_accumulate_semigroup_with_op(a, twice_a, half(n - one()), op)
 }
 
-impl<A> MonoidOperation<A> for Plus
+impl<T> MonoidOperation<T> for Plus
 where
-    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
-    A: num_traits::Zero,
+    Self: SemigroupOperation<T>,
+    T: num_traits::Zero,
 {
-    fn identity_element(&self) -> A {
+    fn identity_element(&self) -> T {
         num_traits::zero()
     }
 }
 
-impl<A> GroupOperation<A> for Plus
+impl<T> MonoidOperation<T> for _Multiplies
 where
-    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
-    A: num_traits::Zero,
-    for<'a> &'a A: std::ops::Neg<Output = A>,
+    Self: SemigroupOperation<T>,
+    T: num_traits::One,
 {
-    fn inverse_operation(&self, x: &A) -> A {
-        -x
+    fn identity_element(&self) -> T {
+        num_traits::one()
     }
 }
 
-pub fn power_monoid_with_op<A, N: Integer, Op>(a: A, n: N, op: &Op) -> A
-where
-    Op: MonoidOperation<A>,
-{
+pub fn power_monoid_with_op<A, N: Integer, Op: MonoidOperation<A>>(a: A, n: N, op: &Op) -> A {
     // precondition(n >= 0);
     if n.is_zero() {
         return op.identity_element();
@@ -362,11 +369,28 @@ where
     power_semigroup_with_op(a, n, op)
 }
 
-pub fn power_group_with_op<A, N: Integer, Op>(mut a: A, mut n: N, op: &Op) -> A
+impl<T> GroupOperation<T> for Plus
 where
-    N: num_traits::Signed,
-    Op: GroupOperation<A>,
+    Self: MonoidOperation<T>,
+    for<'a> &'a T: std::ops::Neg<Output = T>,
 {
+    fn inverse_operation(&self, x: &T) -> T {
+        -x
+    }
+}
+
+impl<T> GroupOperation<T> for _Multiplies
+where
+    Self: MonoidOperation<T>,
+    T: num_traits::One,
+    for<'a> T: std::ops::Div<&'a T, Output = T>,
+{
+    fn inverse_operation(&self, x: &T) -> T {
+        one::<T>() / x
+    }
+}
+
+pub fn power_group_with_op<A, N: Integer, Op: GroupOperation<A>>(mut a: A, mut n: N, op: &Op) -> A {
     if n.is_negative() {
         n = -n;
         a = op.inverse_operation(&a);
