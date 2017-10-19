@@ -30,16 +30,12 @@ where
 {
 }
 
-impl NoncommutativeAdditiveMonoid for i32 {}
-
 pub trait NoncommutativeAdditiveGroup
 where
     Self: NoncommutativeAdditiveMonoid,
     Self: std::ops::Neg<Output = Self>,
 {
 }
-
-impl NoncommutativeAdditiveGroup for i32 {}
 
 pub trait MultiplicativeSemigroup
 where
@@ -48,18 +44,12 @@ where
 {
 }
 
-impl MultiplicativeSemigroup for i32 {}
-impl MultiplicativeSemigroup for f64 {}
-
 pub trait MultiplicativeMonoid
 where
     Self: MultiplicativeSemigroup,
     Self: num_traits::One,
 {
 }
-
-impl MultiplicativeMonoid for i32 {}
-impl MultiplicativeMonoid for f64 {}
 
 pub trait SemigroupOperation<A> {
     fn apply(&self, &A, &A) -> A;
@@ -85,16 +75,12 @@ where
 {
 }
 
-impl AdditiveGroup for i32 {}
-
 pub trait MultiplicativeGroup
 where
     Self: MultiplicativeMonoid,
     Self: std::ops::Div<Output = Self>,
 {
 }
-
-impl MultiplicativeGroup for f64 {}
 
 pub trait Integer
 where
@@ -103,7 +89,36 @@ where
 {
 }
 
-impl Integer for i32 {}
+macro_rules! integral_types {
+    ($($t:ty)*) => ($(
+        impl Integer for $t {}
+    )*)
+}
+
+integral_types!(i8 i16 i32 i64 isize);
+
+macro_rules! arithmetic_types {
+    ($($t:ty)*) => ($(
+        impl NoncommutativeAdditiveSemigroup for $t {}
+        impl NoncommutativeAdditiveMonoid for $t {}
+        impl MultiplicativeSemigroup for $t {}
+        impl MultiplicativeMonoid for $t {}
+    )*)
+}
+
+arithmetic_types!(i8 i16 i32 i64 isize u8 u16 u32 u64 usize f32 f64);
+
+macro_rules! signed_types {
+    ($($t:ty)*) => ($(
+        impl NoncommutativeAdditiveGroup for $t {}
+        impl AdditiveGroup for $t {}
+    )*)
+}
+
+signed_types!(i8 i16 i32 i64 isize f32 f64);
+
+impl MultiplicativeGroup for f32 {}
+impl MultiplicativeGroup for f64 {}
 
 // Section 7.1
 
@@ -152,8 +167,6 @@ where
     Self: std::ops::Add<Output = Self>,
 {
 }
-
-impl NoncommutativeAdditiveSemigroup for i32 {}
 
 
 pub fn multiply_accumulate<A: NoncommutativeAdditiveSemigroup, N: Integer>(
