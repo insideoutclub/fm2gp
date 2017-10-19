@@ -21,40 +21,6 @@
 
 mod ch07;
 use ch07::*;
-extern crate num_traits;
-use ch07::MonoidOperation;
-
-struct Plus();
-
-impl<A> SemigroupOperation<A> for Plus
-where
-    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
-{
-    fn apply(&self, x: &A, y: &A) -> A {
-        x + y
-    }
-}
-
-impl<A> MonoidOperation<A> for Plus
-where
-    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
-    A: num_traits::Zero,
-{
-    fn identity_element(&self) -> A {
-        num_traits::zero()
-    }
-}
-
-impl<A> GroupOperation<A> for Plus
-where
-    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
-    A: num_traits::Zero,
-    for<'a> &'a A: std::ops::Neg<Output = A>,
-{
-    fn inverse_operation(&self, x: &A) -> A {
-        -x
-    }
-}
 
 fn main() {
     println!("mult_acc4(0, 7, 8) = {}", mult_acc4(0, 7, 8));
