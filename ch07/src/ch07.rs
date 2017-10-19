@@ -79,8 +79,16 @@ pub trait GroupOperation<A>
 where
     Self: MonoidOperation<A>,
 {
-    fn inverse_operation(&self, &A) -> A;
+    fn inverse_operation(&self, A) -> A;
 }
+
+pub trait AdditiveGroup
+where
+    Self: NoncommutativeAdditiveGroup,
+{
+}
+
+impl AdditiveGroup for i32 {}
 
 pub trait MultiplicativeGroup
 where
@@ -369,31 +377,32 @@ pub fn power_monoid_with_op<A, N: Integer, Op: MonoidOperation<A>>(a: A, n: N, o
     power_semigroup_with_op(a, n, op)
 }
 
-impl<T> GroupOperation<T> for Plus
+impl<T: AdditiveGroup> GroupOperation<T> for Plus
 where
     Self: MonoidOperation<T>,
-    for<'a> &'a T: std::ops::Neg<Output = T>,
 {
-    fn inverse_operation(&self, x: &T) -> T {
+    fn inverse_operation(&self, x: T) -> T {
         -x
     }
 }
 
-impl<T> GroupOperation<T> for _Multiplies
+fn reciprocal<T: MultiplicativeGroup>(x: T) -> T {
+    one::<T>() / x
+}
+
+impl<T: MultiplicativeGroup> GroupOperation<T> for _Multiplies
 where
     Self: MonoidOperation<T>,
-    T: num_traits::One,
-    for<'a> T: std::ops::Div<&'a T, Output = T>,
 {
-    fn inverse_operation(&self, x: &T) -> T {
-        one::<T>() / x
+    fn inverse_operation(&self, x: T) -> T {
+        reciprocal(x)
     }
 }
 
 pub fn power_group_with_op<A, N: Integer, Op: GroupOperation<A>>(mut a: A, mut n: N, op: &Op) -> A {
     if n.is_negative() {
         n = -n;
-        a = op.inverse_operation(&a);
+        a = op.inverse_operation(a);
     }
     power_monoid_with_op(a, n, op)
 }
