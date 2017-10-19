@@ -22,26 +22,22 @@
 extern crate num_integer;
 extern crate num_traits;
 extern crate std;
-
-pub trait Integer
-where
-    Self: num_integer::Integer,
-    Self: std::ops::Shr<Self, Output = Self>,
-{
-}
-
-impl Integer for i32 {}
-
-fn half<N: Integer>(n: N) -> N {
-    n >> num_traits::one()
-}
+use self::num_integer::Integer;
+use num_traits::one;
 
 // Section 7.1
 
+fn odd<N: Integer>(n: &N) -> bool {
+    n.is_odd()
+}
+
+fn half<N: Integer>(n: N) -> N {
+    n / (one::<N>() + one())
+}
+
 pub fn mult_acc4(mut r: i32, mut n: i32, mut a: i32) -> i32 {
     loop {
-        use ch07::num_integer::Integer;
-        if n.is_odd() {
+        if odd(&n) {
             r += a;
             if n == 1 {
                 return r;
@@ -57,9 +53,9 @@ where
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
 {
     loop {
-        if n.is_odd() {
+        if odd(&n) {
             r = &r + &a;
-            if n == num_traits::one() {
+            if n == one() {
                 return r;
             }
         }
@@ -76,9 +72,9 @@ where
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
 {
     loop {
-        if n.is_odd() {
+        if odd(&n) {
             r = &r + &a;
-            if n == num_traits::one() {
+            if n == one() {
                 return r;
             }
         }
@@ -97,9 +93,9 @@ where
         return r;
     }
     loop {
-        if n.is_odd() {
+        if odd(&n) {
             r = &r + &a;
-            if n == num_traits::one() {
+            if n == one() {
                 return r;
             }
         }
@@ -113,15 +109,15 @@ where
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
 {
     // precondition(n > 0);
-    while !n.is_odd() {
+    while !odd(&n) {
         a = &a + &a;
         n = half(n);
     }
-    if n == num_traits::one() {
+    if n == one() {
         return a;
     }
     let twice_a = &a + &a;
-    multiply_accumulate_semigroup(a, half(n - num_traits::one()), twice_a)
+    multiply_accumulate_semigroup(a, half(n - one()), twice_a)
 }
 
 
@@ -164,9 +160,9 @@ where
         return r;
     }
     loop {
-        if n.is_odd() {
+        if odd(&n) {
             r = &r * &a;
-            if n == num_traits::one() {
+            if n == one() {
                 return r;
             }
         }
@@ -180,15 +176,15 @@ where
     for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
 {
     // precondition(n > 0);
-    while !n.is_odd() {
+    while !odd(&n) {
         a = &a * &a;
         n = half(n);
     }
-    if n == num_traits::one() {
+    if n == one() {
         return a;
     }
     let a_squared = &a * &a;
-    power_accumulate_semigroup(a, a_squared, half(n - num_traits::one()))
+    power_accumulate_semigroup(a, a_squared, half(n - one()))
 }
 
 pub fn power_monoid<A, N: Integer>(a: A, n: N) -> A
@@ -198,7 +194,7 @@ where
 {
     // precondition(n >= 0);
     if n.is_zero() {
-        return num_traits::one();
+        return one();
     };
     power_semigroup(a, n)
 }
@@ -208,7 +204,7 @@ where
     A: num_traits::One,
     A: std::ops::Div<Output = A>,
 {
-    num_traits::one::<A>() / a
+    one::<A>() / a
 }
 
 pub fn power_group<A, N: Integer>(mut a: A, mut n: N) -> A
@@ -245,9 +241,9 @@ where
         return r;
     }
     loop {
-        if n.is_odd() {
+        if odd(&n) {
             r = op.apply(&r, &a);
-            if n == num_traits::one() {
+            if n == one() {
                 return r;
             }
         }
@@ -261,15 +257,15 @@ where
     Op: SemigroupOperation<A>,
 {
     // precondition(n > 0);
-    while !n.is_odd() {
+    while !odd(&n) {
         a = op.apply(&a, &a);
         n = half(n);
     }
-    if n == num_traits::one() {
+    if n == one() {
         return a;
     }
     let twice_a = op.apply(&a, &a);
-    power_accumulate_semigroup_with_op(a, twice_a, half(n - num_traits::one()), op)
+    power_accumulate_semigroup_with_op(a, twice_a, half(n - one()), op)
 }
 
 pub trait MonoidOperation<A>: SemigroupOperation<A> {
