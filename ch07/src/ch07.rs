@@ -22,14 +22,11 @@
 extern crate num_integer;
 extern crate num_traits;
 extern crate std;
-use self::num_traits::one;
-use self::num_traits::Zero;
-use self::num_traits::zero;
 
 pub trait NoncommutativeAdditiveMonoid
 where
     Self: NoncommutativeAdditiveSemigroup,
-    Self: Zero,
+    Self: num_traits::Zero,
 {
 }
 
@@ -115,7 +112,7 @@ fn odd<N: Integer>(n: &N) -> bool {
 }
 
 fn half<N: Integer>(n: N) -> N {
-    n / (one::<N>() + one())
+    n / (num_traits::one::<N>() + num_traits::one())
 }
 
 pub fn mult_acc4(mut r: i32, mut n: i32, mut a: i32) -> i32 {
@@ -138,7 +135,7 @@ where
     loop {
         if odd(&n) {
             r = &r + &a;
-            if n == one() {
+            if n == num_traits::one() {
                 return r;
             }
         }
@@ -167,7 +164,7 @@ pub fn multiply_accumulate<A: NoncommutativeAdditiveSemigroup, N: Integer>(
     loop {
         if odd(&n) {
             r = r + a.clone();
-            if n == one() {
+            if n == num_traits::one() {
                 return r;
             }
         }
@@ -189,7 +186,7 @@ pub fn multiply_accumulate_semigroup<A: NoncommutativeAdditiveSemigroup, N: Inte
     loop {
         if odd(&n) {
             r = r + a.clone();
-            if n == one() {
+            if n == num_traits::one() {
                 return r;
             }
         }
@@ -204,11 +201,11 @@ pub fn multiply_semigroup<A: NoncommutativeAdditiveSemigroup, N: Integer>(mut n:
         a = a.clone() + a;
         n = half(n);
     }
-    if n == one() {
+    if n == num_traits::one() {
         return a;
     }
     let twice_a = a.clone() + a.clone();
-    multiply_accumulate_semigroup(a, half(n - one()), twice_a)
+    multiply_accumulate_semigroup(a, half(n - num_traits::one()), twice_a)
 }
 
 
@@ -217,7 +214,7 @@ pub fn multiply_semigroup<A: NoncommutativeAdditiveSemigroup, N: Integer>(mut n:
 pub fn multiply_monoid<A: NoncommutativeAdditiveMonoid, N: Integer>(n: N, a: A) -> A {
     // precondition(n >= 0);
     if n.is_zero() {
-        return zero();
+        return num_traits::zero();
     }
     multiply_semigroup(n, a)
 }
@@ -244,7 +241,7 @@ pub fn power_accumulate_semigroup<A: MultiplicativeSemigroup, N: Integer>(
     loop {
         if odd(&n) {
             r = r * a.clone();
-            if n == one() {
+            if n == num_traits::one() {
                 return r;
             }
         }
@@ -259,23 +256,23 @@ pub fn power_semigroup<A: MultiplicativeSemigroup, N: Integer>(mut a: A, mut n: 
         a = a.clone() * a;
         n = half(n);
     }
-    if n == one() {
+    if n == num_traits::one() {
         return a;
     }
     let a_squared = a.clone() * a.clone();
-    power_accumulate_semigroup(a, a_squared, half(n - one()))
+    power_accumulate_semigroup(a, a_squared, half(n - num_traits::one()))
 }
 
 pub fn power_monoid<A: MultiplicativeMonoid, N: Integer>(a: A, n: N) -> A {
     // precondition(n >= 0);
     if n.is_zero() {
-        return one();
+        return num_traits::one();
     };
     power_semigroup(a, n)
 }
 
 fn multiplicative_inverse<A: MultiplicativeGroup>(a: A) -> A {
-    one::<A>() / a
+    num_traits::one::<A>() / a
 }
 
 pub fn power_group<A: MultiplicativeGroup, N: Integer>(mut a: A, mut n: N) -> A {
@@ -323,7 +320,7 @@ pub fn power_accumulate_semigroup_with_op<A, N: Integer, Op: SemigroupOperation<
     loop {
         if odd(&n) {
             r = op.apply(&r, &a);
-            if n == one() {
+            if n == num_traits::one() {
                 return r;
             }
         }
@@ -342,11 +339,11 @@ pub fn power_semigroup_with_op<A, N: Integer, Op: SemigroupOperation<A>>(
         a = op.apply(&a, &a);
         n = half(n);
     }
-    if n == one() {
+    if n == num_traits::one() {
         return a;
     }
     let twice_a = op.apply(&a, &a);
-    power_accumulate_semigroup_with_op(a, twice_a, half(n - one()), op)
+    power_accumulate_semigroup_with_op(a, twice_a, half(n - num_traits::one()), op)
 }
 
 impl<T> MonoidOperation<T> for Plus
@@ -387,7 +384,7 @@ where
 }
 
 fn reciprocal<T: MultiplicativeGroup>(x: T) -> T {
-    one::<T>() / x
+    num_traits::one::<T>() / x
 }
 
 impl<T: MultiplicativeGroup> GroupOperation<T> for _Multiplies
