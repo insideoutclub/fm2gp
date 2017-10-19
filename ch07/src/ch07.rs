@@ -39,7 +39,7 @@ where
 
 pub trait MultiplicativeSemigroup
 where
-    Self: Clone,
+    Self: Regular,
     Self: std::ops::Mul<Output = Self>,
 {
 }
@@ -48,6 +48,14 @@ pub trait MultiplicativeMonoid
 where
     Self: MultiplicativeSemigroup,
     Self: num_traits::One,
+{
+}
+
+pub trait Regular
+where
+    Self: std::cmp::PartialEq,
+    Self: Clone,
+    Self: std::cmp::PartialOrd,
 {
 }
 
@@ -89,13 +97,13 @@ where
 {
 }
 
-macro_rules! integral_types {
+macro_rules! signed_integral_types {
     ($($t:ty)*) => ($(
         impl Integer for $t {}
     )*)
 }
 
-integral_types!(i8 i16 i32 i64 isize);
+signed_integral_types!(i8 i16 i32 i64 isize);
 
 macro_rules! arithmetic_types {
     ($($t:ty)*) => ($(
@@ -103,6 +111,7 @@ macro_rules! arithmetic_types {
         impl NoncommutativeAdditiveMonoid for $t {}
         impl MultiplicativeSemigroup for $t {}
         impl MultiplicativeMonoid for $t {}
+        impl Regular for $t {}
     )*)
 }
 
@@ -163,7 +172,7 @@ where
 
 pub trait NoncommutativeAdditiveSemigroup
 where
-    Self: Clone,
+    Self: Regular,
     Self: std::ops::Add<Output = Self>,
 {
 }
@@ -320,7 +329,7 @@ where
     }
 }
 
-pub fn power_accumulate_semigroup_with_op<A, N: Integer, Op: SemigroupOperation<A>>(
+pub fn power_accumulate_semigroup_with_op<A: Regular, N: Integer, Op: SemigroupOperation<A>>(
     mut r: A,
     mut a: A,
     mut n: N,
@@ -342,7 +351,7 @@ pub fn power_accumulate_semigroup_with_op<A, N: Integer, Op: SemigroupOperation<
     }
 }
 
-pub fn power_semigroup_with_op<A, N: Integer, Op: SemigroupOperation<A>>(
+pub fn power_semigroup_with_op<A: Regular, N: Integer, Op: SemigroupOperation<A>>(
     mut a: A,
     mut n: N,
     op: &Op,
@@ -379,7 +388,11 @@ where
     }
 }
 
-pub fn power_monoid_with_op<A, N: Integer, Op: MonoidOperation<A>>(a: A, n: N, op: &Op) -> A {
+pub fn power_monoid_with_op<A: Regular, N: Integer, Op: MonoidOperation<A>>(
+    a: A,
+    n: N,
+    op: &Op,
+) -> A {
     // precondition(n >= 0);
     if n.is_zero() {
         return op.identity_element();
@@ -409,7 +422,11 @@ where
     }
 }
 
-pub fn power_group_with_op<A, N: Integer, Op: GroupOperation<A>>(mut a: A, mut n: N, op: &Op) -> A {
+pub fn power_group_with_op<A: Regular, N: Integer, Op: GroupOperation<A>>(
+    mut a: A,
+    mut n: N,
+    op: &Op,
+) -> A {
     if n.is_negative() {
         n = -n;
         a = op.inverse_operation(a);
