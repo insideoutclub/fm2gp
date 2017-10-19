@@ -25,27 +25,16 @@ extern crate std;
 
 pub trait Integer
 where
+    Self: num_integer::Integer,
     Self: num_traits::One,
     Self: std::ops::Sub<Self, Output = Self>,
 {
     fn half(&self) -> Self;
-    fn odd(&self) -> bool;
-    fn is_zero(&self) -> bool;
-    fn is_one(&self) -> bool;
 }
 
 impl Integer for i32 {
     fn half(&self) -> i32 {
         self >> 1
-    }
-    fn odd(&self) -> bool {
-        self & 0x1 == 1
-    }
-    fn is_zero(&self) -> bool {
-        *self == 0
-    }
-    fn is_one(&self) -> bool {
-        *self == 1
     }
 }
 
@@ -53,7 +42,8 @@ impl Integer for i32 {
 
 pub fn mult_acc4(mut r: i32, mut n: i32, mut a: i32) -> i32 {
     loop {
-        if n.odd() {
+        use ch07::num_integer::Integer;
+        if n.is_odd() {
             r += a;
             if n == 1 {
                 return r;
@@ -69,9 +59,9 @@ where
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
 {
     loop {
-        if n.odd() {
+        if n.is_odd() {
             r = &r + &a;
-            if n.is_one() {
+            if n == num_traits::one() {
                 return r;
             }
         }
@@ -88,9 +78,9 @@ where
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
 {
     loop {
-        if n.odd() {
+        if n.is_odd() {
             r = &r + &a;
-            if n.is_one() {
+            if n == num_traits::one() {
                 return r;
             }
         }
@@ -109,9 +99,9 @@ where
         return r;
     }
     loop {
-        if n.odd() {
+        if n.is_odd() {
             r = &r + &a;
-            if n.is_one() {
+            if n == num_traits::one() {
                 return r;
             }
         }
@@ -125,11 +115,11 @@ where
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
 {
     // precondition(n > 0);
-    while !n.odd() {
+    while !n.is_odd() {
         a = &a + &a;
         n = n.half();
     }
-    if n.is_one() {
+    if n == num_traits::one() {
         return a;
     }
     let twice_a = &a + &a;
@@ -176,9 +166,9 @@ where
         return r;
     }
     loop {
-        if n.odd() {
+        if n.is_odd() {
             r = &r * &a;
-            if n.is_one() {
+            if n == num_traits::one() {
                 return r;
             }
         }
@@ -192,11 +182,11 @@ where
     for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
 {
     // precondition(n > 0);
-    while !n.odd() {
+    while !n.is_odd() {
         a = &a * &a;
         n = n.half();
     }
-    if n.is_one() {
+    if n == num_traits::one() {
         return a;
     }
     let a_squared = &a * &a;
@@ -257,9 +247,9 @@ where
         return r;
     }
     loop {
-        if n.odd() {
+        if n.is_odd() {
             r = op.apply(&r, &a);
-            if n.is_one() {
+            if n == num_traits::one() {
                 return r;
             }
         }
@@ -273,11 +263,11 @@ where
     Op: SemigroupOperation<A>,
 {
     // precondition(n > 0);
-    while !n.odd() {
+    while !n.is_odd() {
         a = op.apply(&a, &a);
         n = n.half();
     }
-    if n.is_one() {
+    if n == num_traits::one() {
         return a;
     }
     let twice_a = op.apply(&a, &a);
