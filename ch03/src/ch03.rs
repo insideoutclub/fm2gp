@@ -59,12 +59,12 @@ pub fn sift0(first: &mut [bool]) {
 }
 
 pub fn sift1(first: &mut [bool]) {
-    let last = first.len();
+    let n = first.len();
     fill(first.iter_mut(), true);
     let mut i = 0;
     let mut index_square = 3;
     let mut factor = 3;
-    while index_square < last {
+    while index_square < n {
         // invariant: index_square = 2i^2 + 6i + 3, factor = 2i + 3
         if first[i] {
             mark_sieve(&mut first[index_square..], factor);
@@ -99,11 +99,12 @@ type LineSegment = u32;
 
 pub fn gcm(a: LineSegment, b: LineSegment) -> LineSegment {
     if a == b {
-        return a;
-    }
-    if b < a {
-        return gcm(a - b, b);
-    }
+        a
+    } else if b < a {
+        gcm(a - b, b)
+    } else
     /* if (a < b) */
-    gcm(a, b - a)
+    {
+        gcm(a, b - a)
+    }
 }
