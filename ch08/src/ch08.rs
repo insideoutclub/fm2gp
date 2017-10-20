@@ -80,10 +80,7 @@ arithmetic_types!(i8 i16 i32 i64 isize u8 u16 u32 u64 usize f32 f64);
 
 // Section 8.1
 
-pub fn polynomial_value<I, R: Semiring>(first: I, x: &R) -> R
-where
-    I: IntoIterator<Item = R>,
-{
+pub fn polynomial_value<I: IntoIterator<Item = R>, R: Semiring>(first: I, x: &R) -> R {
     let mut iter = first.into_iter();
     match iter.next() {
         None => num_traits::zero(),
