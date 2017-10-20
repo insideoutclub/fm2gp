@@ -32,14 +32,14 @@ where
     R: for<'a> std::ops::Add<&'a R, Output = R>,
 {
     let mut iter = first.into_iter();
-    let y = iter.next();
-    if y.is_none() {
-        return num_traits::zero();
+    match iter.next() {
+        None => num_traits::zero(),
+        Some(mut sum) => {
+            for first in iter {
+                sum = sum * x;
+                sum = sum + &first;
+            }
+            sum
+        }
     }
-    let mut sum = y.unwrap();
-    for z in iter {
-        sum = sum * x;
-        sum = sum * &z;
-    }
-    sum
 }
