@@ -16,19 +16,14 @@
 //	Addison-Wesley Professional, 2015
 //
 // -------------------------------------------------------------------
-// ch10.h -- Functions from Chapter 10 of fM2GP.
+// ch10.rs -- Functions from Chapter 10 of fM2GP.
 // -------------------------------------------------------------------
 
 pub mod fmgp {
 
-    extern crate std;
-
     // Section 10.5
 
-    pub fn distance_input<I>(f: I) -> usize
-    where
-        I: Iterator,
-    {
+    pub fn distance_input<I: IntoIterator>(f: I) -> usize {
         let mut n = 0;
         for _ in f {
             n += 1;
@@ -42,10 +37,7 @@ pub mod fmgp {
 
     // Section 10.6
 
-    pub fn advance_input<I>(x: &mut I, mut n: usize)
-    where
-        I: Iterator,
-    {
+    pub fn advance_input<I: Iterator>(x: &mut I, mut n: usize) {
         while n != 0 {
             n -= 1;
             x.next();
@@ -129,7 +121,7 @@ pub mod fmgp {
     where
         I: Iterator,
         I: Clone,
-        I::Item: std::cmp::PartialOrd,
+        I::Item: ::std::cmp::PartialOrd,
     {
         partition_point(f, |x| x < a)
     }
@@ -138,7 +130,7 @@ pub mod fmgp {
     where
         I: Iterator,
         I: Clone,
-        I::Item: std::cmp::PartialOrd,
+        I::Item: ::std::cmp::PartialOrd,
     {
         partition_point(f, |x| x <= a)
     }

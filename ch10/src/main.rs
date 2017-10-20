@@ -53,11 +53,11 @@ fn main() {
     );
     println!("fmgp::distance(x2, y2) is {}", fmgp::distance_input(x2));
     x1 = fmgp::advance_random_access(x1, 3);
-    println!("After advance(x1, 3): ");
+    print!("After advance(x1, 3): ");
     println!("(x1 == y1) is {}", if x1 == y1 { 1 } else { 0 });
     x2 = l.iter();
     fmgp::advance_input(&mut x2, 3);
-    println!("After advance(x2, 3): ");
+    print!("After advance(x2, 3): ");
     println!("(x2 == y2) is {}", if x2.next().is_none() { 1 } else { 0 });
     println!();
 
