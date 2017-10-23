@@ -30,10 +30,24 @@ where
 {
 }
 
+impl<T> NoncommutativeAdditiveMonoid for T
+where
+    T: NoncommutativeAdditiveSemigroup,
+    T: num_traits::Zero,
+{
+}
+
 pub trait NoncommutativeAdditiveGroup
 where
     Self: NoncommutativeAdditiveMonoid,
     Self: std::ops::Neg<Output = Self>,
+{
+}
+
+impl<T> NoncommutativeAdditiveGroup for T
+where
+    T: NoncommutativeAdditiveMonoid,
+    T: std::ops::Neg<Output = T>,
 {
 }
 
@@ -44,10 +58,24 @@ where
 {
 }
 
+impl<T> MultiplicativeSemigroup for T
+where
+    T: Regular,
+    T: std::ops::Mul<Output = Self>,
+{
+}
+
 pub trait MultiplicativeMonoid
 where
     Self: MultiplicativeSemigroup,
     Self: num_traits::One,
+{
+}
+
+impl<T> MultiplicativeMonoid for T
+where
+    T: MultiplicativeSemigroup,
+    T: num_traits::One,
 {
 }
 
@@ -56,6 +84,14 @@ where
     Self: Clone,
     Self: std::cmp::PartialEq,
     Self: std::cmp::PartialOrd,
+{
+}
+
+impl<T> Regular for T
+where
+    T: Clone,
+    T: std::cmp::PartialEq,
+    T: std::cmp::PartialOrd,
 {
 }
 
@@ -83,10 +119,23 @@ where
 {
 }
 
+impl<T> AdditiveGroup for T
+where
+    T: NoncommutativeAdditiveGroup,
+{
+}
+
 pub trait MultiplicativeGroup
 where
     Self: MultiplicativeMonoid,
     Self: std::ops::Div<Output = Self>,
+{
+}
+
+impl<T> MultiplicativeGroup for T
+where
+    T: MultiplicativeMonoid,
+    T: std::ops::Div<Output = Self>,
 {
 }
 
@@ -97,37 +146,12 @@ where
 {
 }
 
-macro_rules! signed_integral_types {
-    ($($t:ty)*) => ($(
-        impl Integer for $t {}
-    )*)
+impl<T> Integer for T
+where
+    T: num_integer::Integer,
+    T: num_traits::Signed,
+{
 }
-
-signed_integral_types!(i8 i16 i32 i64 isize);
-
-macro_rules! arithmetic_types {
-    ($($t:ty)*) => ($(
-        impl NoncommutativeAdditiveSemigroup for $t {}
-        impl NoncommutativeAdditiveMonoid for $t {}
-        impl MultiplicativeSemigroup for $t {}
-        impl MultiplicativeMonoid for $t {}
-        impl Regular for $t {}
-    )*)
-}
-
-arithmetic_types!(i8 i16 i32 i64 isize u8 u16 u32 u64 usize f32 f64);
-
-macro_rules! signed_types {
-    ($($t:ty)*) => ($(
-        impl NoncommutativeAdditiveGroup for $t {}
-        impl AdditiveGroup for $t {}
-    )*)
-}
-
-signed_types!(i8 i16 i32 i64 isize f32 f64);
-
-impl MultiplicativeGroup for f32 {}
-impl MultiplicativeGroup for f64 {}
 
 // Section 7.1
 
@@ -177,6 +201,12 @@ where
 {
 }
 
+impl<T> NoncommutativeAdditiveSemigroup for T
+where
+    T: Regular,
+    T: std::ops::Add<Output = Self>,
+{
+}
 
 pub fn multiply_accumulate<A: NoncommutativeAdditiveSemigroup, N: Integer>(
     mut r: A,
