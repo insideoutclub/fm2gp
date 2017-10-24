@@ -61,7 +61,7 @@ where
 impl<T> MultiplicativeSemigroup for T
 where
     T: Regular,
-    T: std::ops::Mul<Output = Self>,
+    T: std::ops::Mul<Output = T>,
 {
 }
 
@@ -135,7 +135,7 @@ where
 impl<T> MultiplicativeGroup for T
 where
     T: MultiplicativeMonoid,
-    T: std::ops::Div<Output = Self>,
+    T: std::ops::Div<Output = T>,
 {
 }
 
