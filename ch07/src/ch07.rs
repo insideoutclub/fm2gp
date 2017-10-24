@@ -143,6 +143,7 @@ pub trait Integer
 where
     Self: num_integer::Integer,
     Self: num_traits::Signed,
+    Self: std::ops::Shr<Self, Output = Self>,
 {
 }
 
@@ -150,6 +151,7 @@ impl<T> Integer for T
 where
     T: num_integer::Integer,
     T: num_traits::Signed,
+    T: std::ops::Shr<T, Output = T>,
 {
 }
 
@@ -160,7 +162,7 @@ fn odd<N: Integer>(n: &N) -> bool {
 }
 
 fn half<N: Integer>(n: N) -> N {
-    n / (num_traits::one::<N>() + num_traits::one())
+    n >> num_traits::one()
 }
 
 pub fn mult_acc4(mut r: i32, mut n: i32, mut a: i32) -> i32 {
