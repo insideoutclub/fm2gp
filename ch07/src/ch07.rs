@@ -157,11 +157,17 @@ where
 
 // Section 7.1
 
-fn odd<N: Integer>(n: &N) -> bool {
+fn odd<N>(n: &N) -> bool
+where
+    N: Integer,
+{
     n.is_odd()
 }
 
-fn half<N: Integer>(n: N) -> N {
+fn half<N>(n: N) -> N
+where
+    N: Integer,
+{
     n >> num_traits::one()
 }
 
@@ -178,9 +184,10 @@ pub fn mult_acc4(mut r: i32, mut n: i32, mut a: i32) -> i32 {
     }
 }
 
-pub fn multiply_accumulate0<A, N: Integer>(mut r: A, mut n: N, mut a: A) -> A
+pub fn multiply_accumulate0<A, N>(mut r: A, mut n: N, mut a: A) -> A
 where
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
+    N: Integer,
 {
     loop {
         if odd(&n) {
@@ -210,11 +217,11 @@ where
 {
 }
 
-pub fn multiply_accumulate<A: NoncommutativeAdditiveSemigroup, N: Integer>(
-    mut r: A,
-    mut n: N,
-    mut a: A,
-) -> A {
+pub fn multiply_accumulate<A, N>(mut r: A, mut n: N, mut a: A) -> A
+where
+    A: NoncommutativeAdditiveSemigroup,
+    N: Integer,
+{
     loop {
         if odd(&n) {
             r = r + a.clone();
@@ -228,11 +235,11 @@ pub fn multiply_accumulate<A: NoncommutativeAdditiveSemigroup, N: Integer>(
 }
 
 
-pub fn multiply_accumulate_semigroup<A: NoncommutativeAdditiveSemigroup, N: Integer>(
-    mut r: A,
-    mut n: N,
-    mut a: A,
-) -> A {
+pub fn multiply_accumulate_semigroup<A, N>(mut r: A, mut n: N, mut a: A) -> A
+where
+    A: NoncommutativeAdditiveSemigroup,
+    N: Integer,
+{
     // precondition(n >= 0);
     if n.is_zero() {
         return r;
@@ -249,7 +256,11 @@ pub fn multiply_accumulate_semigroup<A: NoncommutativeAdditiveSemigroup, N: Inte
     }
 }
 
-pub fn multiply_semigroup<A: NoncommutativeAdditiveSemigroup, N: Integer>(mut n: N, mut a: A) -> A {
+pub fn multiply_semigroup<A, N>(mut n: N, mut a: A) -> A
+where
+    A: NoncommutativeAdditiveSemigroup,
+    N: Integer,
+{
     // precondition(n > 0);
     while !odd(&n) {
         a = a.clone() + a;
@@ -265,7 +276,11 @@ pub fn multiply_semigroup<A: NoncommutativeAdditiveSemigroup, N: Integer>(mut n:
 
 // Section 7.4
 
-pub fn multiply_monoid<A: NoncommutativeAdditiveMonoid, N: Integer>(n: N, a: A) -> A {
+pub fn multiply_monoid<A, N>(n: N, a: A) -> A
+where
+    A: NoncommutativeAdditiveMonoid,
+    N: Integer,
+{
     // precondition(n >= 0);
     if n.is_zero() {
         return num_traits::zero();
@@ -273,7 +288,11 @@ pub fn multiply_monoid<A: NoncommutativeAdditiveMonoid, N: Integer>(n: N, a: A) 
     multiply_semigroup(n, a)
 }
 
-pub fn multiply_group<A: NoncommutativeAdditiveGroup, N: Integer>(mut n: N, mut a: A) -> A {
+pub fn multiply_group<A, N>(mut n: N, mut a: A) -> A
+where
+    A: NoncommutativeAdditiveGroup,
+    N: Integer,
+{
     if n.is_negative() {
         n = -n;
         a = -a;
@@ -283,11 +302,11 @@ pub fn multiply_group<A: NoncommutativeAdditiveGroup, N: Integer>(mut n: N, mut 
 
 // Section 7.5
 
-pub fn power_accumulate_semigroup<A: MultiplicativeSemigroup, N: Integer>(
-    mut r: A,
-    mut a: A,
-    mut n: N,
-) -> A {
+pub fn power_accumulate_semigroup<A, N>(mut r: A, mut a: A, mut n: N) -> A
+where
+    A: MultiplicativeSemigroup,
+    N: Integer,
+{
     // precondition(n >= 0);
     if n.is_zero() {
         return r;
@@ -304,7 +323,11 @@ pub fn power_accumulate_semigroup<A: MultiplicativeSemigroup, N: Integer>(
     }
 }
 
-pub fn power_semigroup<A: MultiplicativeSemigroup, N: Integer>(mut a: A, mut n: N) -> A {
+pub fn power_semigroup<A, N>(mut a: A, mut n: N) -> A
+where
+    A: MultiplicativeSemigroup,
+    N: Integer,
+{
     // precondition(n > 0);
     while !odd(&n) {
         a = a.clone() * a;
@@ -317,7 +340,11 @@ pub fn power_semigroup<A: MultiplicativeSemigroup, N: Integer>(mut a: A, mut n: 
     power_accumulate_semigroup(a, a_squared, half(n - num_traits::one()))
 }
 
-pub fn power_monoid<A: MultiplicativeMonoid, N: Integer>(a: A, n: N) -> A {
+pub fn power_monoid<A, N>(a: A, n: N) -> A
+where
+    A: MultiplicativeMonoid,
+    N: Integer,
+{
     // precondition(n >= 0);
     if n.is_zero() {
         return num_traits::one();
@@ -325,11 +352,18 @@ pub fn power_monoid<A: MultiplicativeMonoid, N: Integer>(a: A, n: N) -> A {
     power_semigroup(a, n)
 }
 
-fn multiplicative_inverse<A: MultiplicativeGroup>(a: A) -> A {
+fn multiplicative_inverse<A>(a: A) -> A
+where
+    A: MultiplicativeGroup,
+{
     num_traits::one::<A>() / a
 }
 
-pub fn power_group<A: MultiplicativeGroup, N: Integer>(mut a: A, mut n: N) -> A {
+pub fn power_group<A, N>(mut a: A, mut n: N) -> A
+where
+    A: MultiplicativeGroup,
+    N: Integer,
+{
     if n.is_negative() {
         n = -n;
         a = multiplicative_inverse(a);
@@ -361,12 +395,12 @@ where
     }
 }
 
-pub fn power_accumulate_semigroup_with_op<A: Regular, N: Integer, Op: SemigroupOperation<A>>(
-    mut r: A,
-    mut a: A,
-    mut n: N,
-    op: &Op,
-) -> A {
+pub fn power_accumulate_semigroup_with_op<A, N, Op>(mut r: A, mut a: A, mut n: N, op: &Op) -> A
+where
+    A: Regular,
+    N: Integer,
+    Op: SemigroupOperation<A>,
+{
     // precondition(n >= 0);
     if n.is_zero() {
         return r;
@@ -383,11 +417,12 @@ pub fn power_accumulate_semigroup_with_op<A: Regular, N: Integer, Op: SemigroupO
     }
 }
 
-pub fn power_semigroup_with_op<A: Regular, N: Integer, Op: SemigroupOperation<A>>(
-    mut a: A,
-    mut n: N,
-    op: &Op,
-) -> A {
+pub fn power_semigroup_with_op<A, N, Op>(mut a: A, mut n: N, op: &Op) -> A
+where
+    A: Regular,
+    N: Integer,
+    Op: SemigroupOperation<A>,
+{
     // precondition(n > 0);
     while !odd(&n) {
         a = op.call(&a, &a);
@@ -420,11 +455,12 @@ where
     }
 }
 
-pub fn power_monoid_with_op<A: Regular, N: Integer, Op: MonoidOperation<A>>(
-    a: A,
-    n: N,
-    op: &Op,
-) -> A {
+pub fn power_monoid_with_op<A, N, Op>(a: A, n: N, op: &Op) -> A
+where
+    A: Regular,
+    N: Integer,
+    Op: MonoidOperation<A>,
+{
     // precondition(n >= 0);
     if n.is_zero() {
         return op.identity_element();
@@ -432,33 +468,39 @@ pub fn power_monoid_with_op<A: Regular, N: Integer, Op: MonoidOperation<A>>(
     power_semigroup_with_op(a, n, op)
 }
 
-impl<T: AdditiveGroup> GroupOperation<T> for Plus
+impl<T> GroupOperation<T> for Plus
 where
     Self: MonoidOperation<T>,
+    T: AdditiveGroup,
 {
     fn inverse_operation(&self, x: T) -> T {
         -x
     }
 }
 
-fn reciprocal<T: MultiplicativeGroup>(x: T) -> T {
+fn reciprocal<T>(x: T) -> T
+where
+    T: MultiplicativeGroup,
+{
     num_traits::one::<T>() / x
 }
 
-impl<T: MultiplicativeGroup> GroupOperation<T> for _Multiplies
+impl<T> GroupOperation<T> for _Multiplies
 where
     Self: MonoidOperation<T>,
+    T: MultiplicativeGroup,
 {
     fn inverse_operation(&self, x: T) -> T {
         reciprocal(x)
     }
 }
 
-pub fn power_group_with_op<A: Regular, N: Integer, Op: GroupOperation<A>>(
-    mut a: A,
-    mut n: N,
-    op: &Op,
-) -> A {
+pub fn power_group_with_op<A, N, Op>(mut a: A, mut n: N, op: &Op) -> A
+where
+    A: Regular,
+    N: Integer,
+    Op: GroupOperation<A>,
+{
     if n.is_negative() {
         n = -n;
         a = op.inverse_operation(a);
