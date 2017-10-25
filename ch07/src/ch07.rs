@@ -220,17 +220,18 @@ where
 pub fn multiply_accumulate<A, N>(mut r: A, mut n: N, mut a: A) -> A
 where
     A: NoncommutativeAdditiveSemigroup,
+    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
     N: Integer,
 {
     loop {
         if odd(&n) {
-            r = r + a.clone();
+            r = &r + &a;
             if n == num_traits::one() {
                 return r;
             }
         }
         n = half(n);
-        a = a.clone() + a;
+        a = &a + &a;
     }
 }
 
@@ -238,6 +239,7 @@ where
 pub fn multiply_accumulate_semigroup<A, N>(mut r: A, mut n: N, mut a: A) -> A
 where
     A: NoncommutativeAdditiveSemigroup,
+    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
     N: Integer,
 {
     // precondition(n >= 0);
@@ -246,30 +248,31 @@ where
     }
     loop {
         if odd(&n) {
-            r = r + a.clone();
+            r = &r + &a;
             if n == num_traits::one() {
                 return r;
             }
         }
         n = half(n);
-        a = a.clone() + a;
+        a = &a + &a;
     }
 }
 
 pub fn multiply_semigroup<A, N>(mut n: N, mut a: A) -> A
 where
     A: NoncommutativeAdditiveSemigroup,
+    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
     N: Integer,
 {
     // precondition(n > 0);
     while !odd(&n) {
-        a = a.clone() + a;
+        a = &a + &a;
         n = half(n);
     }
     if n == num_traits::one() {
         return a;
     }
-    let twice_a = a.clone() + a.clone();
+    let twice_a = &a + &a;
     multiply_accumulate_semigroup(a, half(n - num_traits::one()), twice_a)
 }
 
@@ -279,6 +282,7 @@ where
 pub fn multiply_monoid<A, N>(n: N, a: A) -> A
 where
     A: NoncommutativeAdditiveMonoid,
+    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
     N: Integer,
 {
     // precondition(n >= 0);
@@ -291,6 +295,7 @@ where
 pub fn multiply_group<A, N>(mut n: N, mut a: A) -> A
 where
     A: NoncommutativeAdditiveGroup,
+    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
     N: Integer,
 {
     if n.is_negative() {
@@ -305,6 +310,7 @@ where
 pub fn power_accumulate_semigroup<A, N>(mut r: A, mut a: A, mut n: N) -> A
 where
     A: MultiplicativeSemigroup,
+    for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
     N: Integer,
 {
     // precondition(n >= 0);
@@ -313,36 +319,38 @@ where
     }
     loop {
         if odd(&n) {
-            r = r * a.clone();
+            r = &r * &a;
             if n == num_traits::one() {
                 return r;
             }
         }
         n = half(n);
-        a = a.clone() * a;
+        a = &a * &a;
     }
 }
 
 pub fn power_semigroup<A, N>(mut a: A, mut n: N) -> A
 where
     A: MultiplicativeSemigroup,
+    for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
     N: Integer,
 {
     // precondition(n > 0);
     while !odd(&n) {
-        a = a.clone() * a;
+        a = &a * &a;
         n = half(n);
     }
     if n == num_traits::one() {
         return a;
     }
-    let a_squared = a.clone() * a.clone();
+    let a_squared = &a * &a;
     power_accumulate_semigroup(a, a_squared, half(n - num_traits::one()))
 }
 
 pub fn power_monoid<A, N>(a: A, n: N) -> A
 where
     A: MultiplicativeMonoid,
+    for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
     N: Integer,
 {
     // precondition(n >= 0);
@@ -362,6 +370,7 @@ where
 pub fn power_group<A, N>(mut a: A, mut n: N) -> A
 where
     A: MultiplicativeGroup,
+    for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
     N: Integer,
 {
     if n.is_negative() {
