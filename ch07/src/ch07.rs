@@ -242,7 +242,7 @@ where
     N: Integer,
 {
     // precondition(n >= 0);
-    if n.is_zero() {
+    if n == num_traits::zero() {
         return r;
     }
     loop {
@@ -282,7 +282,7 @@ where
     N: Integer,
 {
     // precondition(n >= 0);
-    if n.is_zero() {
+    if n == num_traits::zero() {
         return num_traits::zero();
     }
     multiply_semigroup(n, a)
@@ -293,7 +293,7 @@ where
     A: NoncommutativeAdditiveGroup,
     N: Integer,
 {
-    if n.is_negative() {
+    if n < num_traits::zero() {
         n = -n;
         a = -a;
     }
@@ -308,7 +308,7 @@ where
     N: Integer,
 {
     // precondition(n >= 0);
-    if n.is_zero() {
+    if n == num_traits::zero() {
         return r;
     }
     loop {
@@ -345,9 +345,9 @@ where
     N: Integer,
 {
     // precondition(n >= 0);
-    if n.is_zero() {
+    if n == num_traits::zero() {
         return num_traits::one();
-    };
+    }
     power_semigroup(a, n)
 }
 
@@ -363,7 +363,7 @@ where
     A: MultiplicativeGroup,
     N: Integer,
 {
-    if n.is_negative() {
+    if n < num_traits::zero() {
         n = -n;
         a = multiplicative_inverse(a);
     }
@@ -401,7 +401,7 @@ where
     Op: SemigroupOperation<A>,
 {
     // precondition(n >= 0);
-    if n.is_zero() {
+    if n == num_traits::zero() {
         return r;
     }
     loop {
@@ -430,7 +430,12 @@ where
     if n == num_traits::one() {
         return a;
     }
-    power_accumulate_semigroup_with_op(a.clone(), op.call(a.clone(), a), half(n - num_traits::one()), op)
+    power_accumulate_semigroup_with_op(
+        a.clone(),
+        op.call(a.clone(), a),
+        half(n - num_traits::one()),
+        op,
+    )
 }
 
 impl<T> MonoidOperation<T> for Plus
@@ -460,7 +465,7 @@ where
     Op: MonoidOperation<A>,
 {
     // precondition(n >= 0);
-    if n.is_zero() {
+    if n == num_traits::zero() {
         return op.identity_element();
     }
     power_semigroup_with_op(a, n, op)
@@ -499,7 +504,7 @@ where
     N: Integer,
     Op: GroupOperation<A>,
 {
-    if n.is_negative() {
+    if n < num_traits::zero() {
         n = -n;
         a = op.inverse_operation(a);
     }
