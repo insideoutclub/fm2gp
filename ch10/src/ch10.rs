@@ -23,7 +23,10 @@ pub mod fmgp {
 
     // Section 10.5
 
-    pub fn distance_input<I: IntoIterator>(f: I) -> usize {
+    pub fn distance_input<I>(f: I) -> usize
+    where
+        I: IntoIterator,
+    {
         let mut n = 0;
         for _ in f {
             n += 1;
@@ -37,7 +40,10 @@ pub mod fmgp {
 
     // Section 10.6
 
-    pub fn advance_input<I: Iterator>(x: &mut I, mut n: usize) {
+    pub fn advance_input<I>(x: &mut I, mut n: usize)
+    where
+        I: Iterator,
+    {
         while n != 0 {
             n -= 1;
             x.next();

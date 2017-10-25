@@ -19,9 +19,11 @@
 // ch03.rs -- Functions from Chapter 3 of fM2GP.
 // -------------------------------------------------------------------
 
+type Integer = usize;
+
 // Section 3.3
 
-pub fn mark_sieve(slice: &mut [bool], factor: usize) {
+pub fn mark_sieve(slice: &mut [bool], factor: Integer) {
     let (mut first, last) = (0, slice.len());
     // assert(first != last)
     slice[first] = false;
