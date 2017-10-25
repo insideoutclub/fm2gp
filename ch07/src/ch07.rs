@@ -96,7 +96,7 @@ where
 }
 
 pub trait SemigroupOperation<A> {
-    fn call(&self, &A, &A) -> A;
+    fn call(&self, A, A) -> A;
 }
 
 pub trait MonoidOperation<A>
@@ -270,8 +270,7 @@ where
     if n == num_traits::one() {
         return a;
     }
-    let twice_a = a.clone() + a.clone();
-    multiply_accumulate_semigroup(a, half(n - num_traits::one()), twice_a)
+    multiply_accumulate_semigroup(a.clone(), half(n - num_traits::one()), a.clone() + a)
 }
 
 
@@ -337,8 +336,7 @@ where
     if n == num_traits::one() {
         return a;
     }
-    let a_squared = a.clone() * a.clone();
-    power_accumulate_semigroup(a, a_squared, half(n - num_traits::one()))
+    power_accumulate_semigroup(a.clone(), a.clone() * a, half(n - num_traits::one()))
 }
 
 pub fn power_monoid<A, N>(a: A, n: N) -> A
@@ -378,9 +376,9 @@ pub struct Plus();
 
 impl<A> SemigroupOperation<A> for Plus
 where
-    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
+    A: std::ops::Add<Output = A>,
 {
-    fn call(&self, x: &A, y: &A) -> A {
+    fn call(&self, x: A, y: A) -> A {
         x + y
     }
 }
@@ -389,9 +387,9 @@ pub struct _Multiplies();
 
 impl<A> SemigroupOperation<A> for _Multiplies
 where
-    for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
+    A: std::ops::Mul<Output = A>,
 {
-    fn call(&self, x: &A, y: &A) -> A {
+    fn call(&self, x: A, y: A) -> A {
         x * y
     }
 }
@@ -408,13 +406,13 @@ where
     }
     loop {
         if odd(&n) {
-            r = op.call(&r, &a);
+            r = op.call(r, a.clone());
             if n == num_traits::one() {
                 return r;
             }
         }
         n = half(n);
-        a = op.call(&a, &a);
+        a = op.call(a.clone(), a);
     }
 }
 
@@ -426,14 +424,13 @@ where
 {
     // precondition(n > 0);
     while !odd(&n) {
-        a = op.call(&a, &a);
+        a = op.call(a.clone(), a);
         n = half(n);
     }
     if n == num_traits::one() {
         return a;
     }
-    let twice_a = op.call(&a, &a);
-    power_accumulate_semigroup_with_op(a, twice_a, half(n - num_traits::one()), op)
+    power_accumulate_semigroup_with_op(a.clone(), op.call(a.clone(), a), half(n - num_traits::one()), op)
 }
 
 impl<T> MonoidOperation<T> for Plus
@@ -527,7 +524,7 @@ pub fn fibonacci_iterative(n: i32) -> i32 {
         return 0;
     }
     let mut v = (0, 1);
-    for _i in 1..n {
+    for _ in 1..n {
         v = (v.1, v.0 + v.1);
     }
     v.1
