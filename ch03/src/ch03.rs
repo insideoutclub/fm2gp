@@ -99,12 +99,11 @@ type LineSegment = u32;
 
 pub fn gcm(a: LineSegment, b: LineSegment) -> LineSegment {
     if a == b {
-        a
-    } else if b < a {
-        gcm(a - b, b)
-    } else
-    /* if (a < b) */
-    {
-        gcm(a, b - a)
+        return a;
     }
+    if b < a {
+        return gcm(a - b, b);
+    }
+    /* if (a < b) */
+    gcm(a, b - a)
 }

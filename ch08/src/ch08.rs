@@ -30,10 +30,25 @@ where
 {
 }
 
+impl<T> Regular for T
+where
+    T: Clone,
+    T: std::cmp::PartialEq,
+    T: std::cmp::PartialOrd,
+{
+}
+
 pub trait AdditiveSemigroup
 where
     Self: Regular,
     Self: std::ops::Add<Output = Self>,
+{
+}
+
+impl<T> AdditiveSemigroup for T
+where
+    T: Regular,
+    T: std::ops::Add<Output = Self>,
 {
 }
 
@@ -44,10 +59,24 @@ where
 {
 }
 
+impl<T> AdditiveMonoid for T
+where
+    T: AdditiveSemigroup,
+    T: num_traits::Zero,
+{
+}
+
 pub trait MultiplicativeSemigroup
 where
     Self: Regular,
     Self: std::ops::Mul<Output = Self>,
+{
+}
+
+impl<T> MultiplicativeSemigroup for T
+where
+    T: Regular,
+    T: std::ops::Mul<Output = T>,
 {
 }
 
@@ -58,6 +87,13 @@ where
 {
 }
 
+impl<T> MultiplicativeMonoid for T
+where
+    T: MultiplicativeSemigroup,
+    T: num_traits::One,
+{
+}
+
 pub trait Semiring
 where
     Self: AdditiveMonoid,
@@ -65,22 +101,20 @@ where
 {
 }
 
-macro_rules! arithmetic_types {
-    ($($t:ty)*) => ($(
-        impl Regular for $t {}
-        impl AdditiveSemigroup for $t {}
-        impl AdditiveMonoid for $t {}
-        impl MultiplicativeSemigroup for $t {}
-        impl MultiplicativeMonoid for $t {}
-        impl Semiring for $t {}
-    )*)
+impl<T> Semiring for T
+where
+    T: AdditiveMonoid,
+    T: MultiplicativeMonoid,
+{
 }
-
-arithmetic_types!(i8 i16 i32 i64 isize u8 u16 u32 u64 usize f32 f64);
 
 // Section 8.1
 
-pub fn polynomial_value<I: IntoIterator<Item = R>, R: Semiring>(first: I, x: &R) -> R {
+pub fn polynomial_value<I, R>(first: I, x: &R) -> R
+where
+    I: IntoIterator<Item = R>,
+    R: Semiring,
+{
     let mut iter = first.into_iter();
     match iter.next() {
         None => num_traits::zero(),
