@@ -74,18 +74,16 @@ pub mod fmgp {
     pub fn find_if_n<I, P>(
         f: &mut I,
         mut n: DifferenceType,
-        p: P,
+        mut p: P,
     ) -> (Option<I::Item>, DifferenceType)
     where
         I: Iterator,
-        P: Fn(&I::Item) -> bool,
+        P: FnMut(&I::Item) -> bool,
     {
         while n != 0 {
-            match f.next() {
-                Some(x) => if p(&x) {
-                    return (Some(x), n);
-                },
-                None => break,
+            let x = f.next().unwrap();
+            if p(&x) {
+                return (Some(x), n);
             }
             n -= 1;
         }
@@ -94,24 +92,21 @@ pub mod fmgp {
 
     // Section 10.8
 
-    pub fn partition_point_n<I, P>(mut f: I, mut n: DifferenceType, p: P) -> I
+    pub fn partition_point_n<I, P>(mut f: I, mut n: DifferenceType, mut p: P) -> I
     where
         I: Iterator,
         I: Clone,
-        P: Fn(&I::Item) -> bool,
+        P: FnMut(&I::Item) -> bool,
     {
         while n != 0 {
             let mut middle = f.clone();
             let half = n >> 1;
             advance_input(&mut middle, half);
-            match middle.next() {
-                Some(x) => if !p(&x) {
-                    n = half;
-                } else {
-                    f = middle;
-                    n -= half + 1;
-                },
-                None => break,
+            if !p(&middle.next().unwrap()) {
+                n = half;
+            } else {
+                f = middle;
+                n -= half + 1;
             }
         }
         f
@@ -121,10 +116,9 @@ pub mod fmgp {
     where
         I: Iterator,
         I: Clone,
-        P: Fn(&I::Item) -> bool,
+        P: FnMut(&I::Item) -> bool,
     {
-        let n = distance_input(f.clone());
-        partition_point_n(f, n, p)
+        partition_point_n(f.clone(), distance_input(f), p)
     }
 
     pub fn lower_bound<I>(f: I, a: &I::Item) -> I
