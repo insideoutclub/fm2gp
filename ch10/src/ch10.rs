@@ -19,6 +19,44 @@
 // ch10.rs -- Functions from Chapter 10 of fM2GP.
 // -------------------------------------------------------------------
 
+pub trait InputIterator
+where
+    Self: Iterator,
+{
+}
+
+impl<T> InputIterator for T
+where
+    T: Iterator,
+{
+}
+
+pub trait ForwardIterator
+where
+    Self: InputIterator,
+    Self: Clone,
+{
+}
+
+impl<T> ForwardIterator for T
+where
+    T: InputIterator,
+    T: Clone,
+{
+}
+
+pub trait Predicate<T>
+where
+    Self: FnMut(&T) -> bool,
+{
+}
+
+impl<T, U> Predicate<U> for T
+where
+    T: FnMut(&U) -> bool,
+{
+}
+
 pub mod fmgp {
 
     // Section 10.5
@@ -27,7 +65,7 @@ pub mod fmgp {
 
     pub fn distance_input<I>(f: I) -> DifferenceType
     where
-        I: IntoIterator,
+        I: ::InputIterator,
     {
         let mut n = 0;
         for _ in f {
@@ -44,7 +82,7 @@ pub mod fmgp {
 
     pub fn advance_input<I>(x: &mut I, mut n: DifferenceType)
     where
-        I: Iterator,
+        I: ::InputIterator,
     {
         while n != 0 {
             n -= 1;
@@ -60,8 +98,8 @@ pub mod fmgp {
 
     pub fn find_if<I, P>(f: &mut I, mut p: P) -> Option<I::Item>
     where
-        I: Iterator,
-        P: FnMut(&I::Item) -> bool,
+        I: ::InputIterator,
+        P: ::Predicate<I::Item>,
     {
         for x in f.by_ref() {
             if p(&x) {
@@ -77,8 +115,8 @@ pub mod fmgp {
         mut p: P,
     ) -> (Option<I::Item>, DifferenceType)
     where
-        I: Iterator,
-        P: FnMut(&I::Item) -> bool,
+        I: ::InputIterator,
+        P: ::Predicate<I::Item>,
     {
         while n != 0 {
             let x = f.next().unwrap();
@@ -94,9 +132,8 @@ pub mod fmgp {
 
     pub fn partition_point_n<I, P>(mut f: I, mut n: DifferenceType, mut p: P) -> I
     where
-        I: Iterator,
-        I: Clone,
-        P: FnMut(&I::Item) -> bool,
+        I: ::ForwardIterator,
+        P: ::Predicate<I::Item>,
     {
         while n != 0 {
             let mut middle = f.clone();
@@ -114,28 +151,25 @@ pub mod fmgp {
 
     pub fn partition_point<I, P>(f: I, p: P) -> I
     where
-        I: Iterator,
-        I: Clone,
-        P: FnMut(&I::Item) -> bool,
+        I: ::ForwardIterator,
+        P: ::Predicate<I::Item>,
     {
         partition_point_n(f.clone(), distance_input(f), p)
     }
 
     pub fn lower_bound<I>(f: I, a: &I::Item) -> I
     where
-        I: Iterator,
-        I: Clone,
+        I: ::ForwardIterator,
         I::Item: ::std::cmp::PartialOrd,
     {
-        partition_point(f, |x| x < a)
+        partition_point(f, |x: &I::Item| x < a)
     }
 
     pub fn upper_bound<I>(f: I, a: &I::Item) -> I
     where
-        I: Iterator,
-        I: Clone,
+        I: ::ForwardIterator,
         I::Item: ::std::cmp::PartialOrd,
     {
-        partition_point(f, |x| x <= a)
+        partition_point(f, |x: &I::Item| x <= a)
     }
 } // namespace fmgp
