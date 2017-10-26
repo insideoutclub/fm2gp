@@ -22,6 +22,18 @@
 extern crate num_traits;
 extern crate std;
 
+pub trait InputIterator
+where
+    Self: Iterator,
+{
+}
+
+impl<T> InputIterator for T
+where
+    T: Iterator,
+{
+}
+
 pub trait Regular
 where
     Self: Clone,
@@ -112,7 +124,7 @@ where
 
 pub fn polynomial_value<I, R>(first: I, x: &R) -> R
 where
-    I: IntoIterator<Item = R>,
+    I: Iterator<Item = R>,
     R: Semiring,
 {
     let mut iter = first.into_iter();
