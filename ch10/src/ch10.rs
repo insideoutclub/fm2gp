@@ -58,19 +58,17 @@ pub mod fmgp {
 
     // Section 10.7
 
-    pub fn find_if<I, P>(f: &mut I, p: P) -> Option<I::Item>
+    pub fn find_if<I, P>(f: &mut I, mut p: P) -> Option<I::Item>
     where
         I: Iterator,
-        P: Fn(&I::Item) -> bool,
+        P: FnMut(&I::Item) -> bool,
     {
-        loop {
-            match f.next() {
-                Some(x) => if p(&x) {
-                    return Some(x);
-                },
-                None => return None,
+        for x in f.by_ref() {
+            if p(&x) {
+                return Some(x);
             }
         }
+        None
     }
 
     pub fn find_if_n<I, P>(
