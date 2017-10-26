@@ -23,7 +23,9 @@ pub mod fmgp {
 
     // Section 10.5
 
-    pub fn distance_input<I>(f: I) -> usize
+    type DifferenceType = usize;
+
+    pub fn distance_input<I>(f: I) -> DifferenceType
     where
         I: IntoIterator,
     {
@@ -34,13 +36,13 @@ pub mod fmgp {
         n
     }
 
-    pub fn distance_random_access<T>(f: &[T]) -> usize {
+    pub fn distance_random_access<T>(f: &[T]) -> DifferenceType {
         f.len()
     }
 
     // Section 10.6
 
-    pub fn advance_input<I>(x: &mut I, mut n: usize)
+    pub fn advance_input<I>(x: &mut I, mut n: DifferenceType)
     where
         I: Iterator,
     {
@@ -50,7 +52,7 @@ pub mod fmgp {
         }
     }
 
-    pub fn advance_random_access<T>(x: &[T], n: usize) -> &[T] {
+    pub fn advance_random_access<T>(x: &[T], n: DifferenceType) -> &[T] {
         &x[n..]
     }
 
@@ -71,7 +73,11 @@ pub mod fmgp {
         }
     }
 
-    pub fn find_if_n<I, P>(f: &mut I, mut n: usize, p: P) -> (Option<I::Item>, usize)
+    pub fn find_if_n<I, P>(
+        f: &mut I,
+        mut n: DifferenceType,
+        p: P,
+    ) -> (Option<I::Item>, DifferenceType)
     where
         I: Iterator,
         P: Fn(&I::Item) -> bool,
@@ -90,7 +96,7 @@ pub mod fmgp {
 
     // Section 10.8
 
-    pub fn partition_point_n<I, P>(mut f: I, mut n: usize, p: P) -> I
+    pub fn partition_point_n<I, P>(mut f: I, mut n: DifferenceType, p: P) -> I
     where
         I: Iterator,
         I: Clone,
