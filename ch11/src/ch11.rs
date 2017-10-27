@@ -35,6 +35,18 @@ where
 {
 }
 
+pub trait ForwardIterator
+where
+    Self: InputIterator,
+{
+}
+
+impl<T> ForwardIterator for T
+where
+    T: InputIterator,
+{
+}
+
 pub trait BidirectionalIterator
 where
     Self: DoubleEndedIterator,
@@ -58,6 +70,18 @@ impl<T> RandomAccessIterator for T
 where
     T: BidirectionalIterator,
     T: ExactSizeIterator,
+{
+}
+
+pub trait OutputIterator
+where
+    Self: Iterator,
+{
+}
+
+impl<T> OutputIterator for T
+where
+    T: Iterator,
 {
 }
 
@@ -421,8 +445,8 @@ pub mod fmgp {
     where
         T: Clone,
         T: 'a,
-        I: DoubleEndedIterator<Item = &'a T>,
-        O: Iterator<Item = &'a mut T>,
+        I: ::BidirectionalIterator<Item = &'a T>,
+        O: ::OutputIterator<Item = &'a mut T>,
     {
         while let Some(x) = l.next_back() {
             *result.next().unwrap() = x.clone();
@@ -434,26 +458,24 @@ pub mod fmgp {
     where
         T: Clone,
         T: 'a,
-        I: Iterator<Item = &'a T>,
-        N: ::ch11::num_traits::Num,
-        O: Iterator<Item = &'a mut T>,
+        I: ::InputIterator<Item = &'a T>,
+        N: ::Integer,
+        O: ::OutputIterator<Item = &'a mut T>,
     {
-        while !n.is_zero() {
+        while n != ::ch11::num_traits::zero() {
             *result.next().unwrap() = first.next().unwrap().clone();
-            n = n - ::ch11::num_traits::one();
+            n -= ::ch11::num_traits::one();
         }
         result
     }
 
-    fn reverse_n_with_buffer<T, N>(slice: &mut [T], f: usize, n: N, buffer: &mut [T]) -> N
+    fn reverse_n_with_buffer<T, N>(slice: &mut [T], f: usize, n: N, buffer: &mut [T])
     where
         T: Clone,
-        N: ::ch11::num_traits::Num,
-        N: Clone,
+        N: ::Integer,
     {
-        copy_n(slice[f..].iter(), n.clone(), buffer.iter_mut());
+        copy_n(slice[f..].iter(), n, buffer.iter_mut());
         reverse_copy(buffer.iter(), slice[f..].iter_mut());
-        n
     }
 
     // Section 11.7
@@ -474,7 +496,8 @@ pub mod fmgp {
             return f;
         }
         if n <= buffer.len() {
-            return reverse_n_with_buffer(slice, f, n, buffer);
+            reverse_n_with_buffer(slice, f, n, buffer);
+            return n;
         }
         let h = n >> 1;
         let mut m = reverse_n_adaptive(slice, f, h, buffer);
