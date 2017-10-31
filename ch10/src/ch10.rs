@@ -29,6 +29,16 @@ where
     x: I,
 }
 
+impl<I> std::ops::Deref for MyIterator<I>
+where
+    I: Iterator,
+{
+    type Target = I::Item;
+    fn deref(&self) -> &Self::Target {
+        self.value.as_ref().unwrap()
+    }
+}
+
 impl<I> PartialEq for MyIterator<I>
 where
     I: Iterator,
@@ -47,9 +57,6 @@ where
     type DifferenceType = isize;
     fn successor(&mut self) {
         self.value = self.x.next();
-    }
-    fn source(&self) -> Self::ValueType {
-        self.value.clone().unwrap()
     }
 }
 
@@ -84,11 +91,11 @@ where
 pub trait InputIterator
 where
     Self: PartialEq,
+    Self: std::ops::Deref,
 {
     type ValueType;
     type DifferenceType;
     fn successor(&mut self);
-    fn source(&self) -> Self::ValueType;
 }
 
 pub trait ForwardIterator
@@ -141,6 +148,16 @@ where
     }
 }
 
+impl<'a, T> std::ops::Deref for MyRandomAccessIterator<'a, T>
+where
+    T: Clone,
+{
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.slice[self.index]
+    }
+}
+
 impl<'a, T> PartialEq for MyRandomAccessIterator<'a, T>
 where
     T: Clone,
@@ -158,9 +175,6 @@ where
     type DifferenceType = isize;
     fn successor(&mut self) {
         self.index += 1;
-    }
-    fn source(&self) -> Self::ValueType {
-        self.slice[self.index].clone()
     }
 }
 
@@ -246,9 +260,10 @@ pub mod fmgp {
     pub fn find_if<I, P>(mut f: I, l: &I, mut p: P) -> I
     where
         I: ::InputIterator,
-        P: ::Predicate<I::ValueType>,
+        P: ::Predicate<I::Target>,
+        I::Target: Sized,
     {
-        while &f != l && !p(&f.source()) {
+        while &f != l && !p(&*f) {
             f.successor();
         }
         f
@@ -257,9 +272,10 @@ pub mod fmgp {
     pub fn find_if_n<I, P>(mut f: I, mut n: DifferenceType, mut p: P) -> (I, DifferenceType)
     where
         I: ::InputIterator,
-        P: ::Predicate<I::ValueType>,
+        P: ::Predicate<I::Target>,
+        I::Target: Sized,
     {
-        while n != 0 && !p(&f.source()) {
+        while n != 0 && !p(&*f) {
             f.successor();
             n -= 1;
         }
@@ -271,13 +287,14 @@ pub mod fmgp {
     pub fn partition_point_n<I, P>(mut f: I, mut n: DifferenceType, mut p: P) -> I
     where
         I: ::ForwardIterator,
-        P: ::Predicate<I::ValueType>,
+        P: ::Predicate<I::Target>,
+        I::Target: Sized,
     {
         while n != 0 {
             let mut middle = f.clone();
             let half = n >> 1;
             advance_input(&mut middle, half);
-            if !p(&middle.source()) {
+            if !p(&*middle) {
                 n = half;
             } else {
                 middle.successor();
@@ -291,24 +308,27 @@ pub mod fmgp {
     pub fn partition_point<I, P>(f: I, l: &I, p: P) -> I
     where
         I: ::ForwardIterator,
-        P: ::Predicate<I::ValueType>,
+        P: ::Predicate<I::Target>,
+        I::Target: Sized,
     {
         partition_point_n(f.clone(), distance_input(f, l), p)
     }
 
-    pub fn lower_bound<I>(f: I, l: &I, a: &I::ValueType) -> I
+    pub fn lower_bound<I>(f: I, l: &I, a: &I::Target) -> I
     where
         I: ::ForwardIterator,
-        I::ValueType: ::std::cmp::PartialOrd,
+        I::Target: ::std::cmp::PartialOrd,
+        I::Target: Sized,
     {
-        partition_point(f, l, |x: &I::ValueType| x < a)
+        partition_point(f, l, |x: &I::Target| x < a)
     }
 
-    pub fn upper_bound<I>(f: I, l: &I, a: &I::ValueType) -> I
+    pub fn upper_bound<I>(f: I, l: &I, a: &I::Target) -> I
     where
         I: ::ForwardIterator,
-        I::ValueType: ::std::cmp::PartialOrd,
+        I::Target: ::std::cmp::PartialOrd,
+        I::Target: Sized,
     {
-        partition_point(f, l, |x: &I::ValueType| x <= a)
+        partition_point(f, l, |x: &I::Target| x <= a)
     }
 } // namespace fmgp

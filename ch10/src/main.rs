@@ -81,52 +81,52 @@ fn main() {
 
     println!(
         "*fmgp::find_if(x1, y1, equal_3) is {}",
-        fmgp::find_if(x1.clone(), &y1, foo).source()
+        *fmgp::find_if(x1.clone(), &y1, foo)
     );
     println!(
         "*fmgp::find_if(x2, y2, equal_3) is {}",
-        fmgp::find_if(x2, &y2, equal_3).source()
+        *fmgp::find_if(x2, &y2, equal_3)
     );
     println!(
         "*fmgp::find_if_n(x1, 5, equal_3).first is {}",
-        fmgp::find_if_n(x1.clone(), 3, foo).0.source()
+        *fmgp::find_if_n(x1.clone(), 3, foo).0
     );
     println!(
         "*fmgp::find_if_n(x2, 5, equal_3).first is {}",
-        fmgp::find_if_n(begin(l.iter()), 3, equal_3).0.source()
+        *fmgp::find_if_n(begin(l.iter()), 3, equal_3).0
     );
 
     println!(
         "*fmgp::partition_point(x1, y1, less_3) is {}",
-        fmgp::partition_point(x1.clone(), &y1, bar).source()
+        *fmgp::partition_point(x1.clone(), &y1, bar)
     );
     println!(
         "*fmgp::partition_point(x2, y2, less_3) is {}",
-        fmgp::partition_point(begin(l.iter()), &y2, less_3).source()
+        *fmgp::partition_point(begin(l.iter()), &y2, less_3)
     );
     println!(
         "*fmgp::partition_point_n(x1, 5, less_3) is {}",
-        fmgp::partition_point_n(x1.clone(), 3, bar).source()
+        *fmgp::partition_point_n(x1.clone(), 3, bar)
     );
     println!(
         "*fmgp::partition_point_n(x2, 5, less_3) is {}",
-        fmgp::partition_point_n(begin(l.iter()), 3, less_3).source()
+        *fmgp::partition_point_n(begin(l.iter()), 3, less_3)
     );
     println!(
         "*fmgp::upper_bound(x1, y1, 2) is {}",
-        fmgp::upper_bound(x1.clone(), &y1, &2).source()
+        *fmgp::upper_bound(x1.clone(), &y1, &2)
     );
     println!(
         "*fmgp::upper_bound(x2, y2, 2) is {}",
-        fmgp::upper_bound(begin(l.iter()), &y2, &&2).source()
+        *fmgp::upper_bound(begin(l.iter()), &y2, &&2)
     );
 
     println!(
         "*fmgp::lower_bound(x1, y1, 2) is {}",
-        fmgp::lower_bound(x1, &y1, &2).source()
+        *fmgp::lower_bound(x1, &y1, &2)
     );
     println!(
         "*fmgp::lower_bound(x2, y2, 2) is {}",
-        fmgp::lower_bound(begin(l.iter()), &y2, &&2).source()
+        *fmgp::lower_bound(begin(l.iter()), &y2, &&2)
     );
 }
