@@ -83,7 +83,6 @@ pub trait Regular
 where
     Self: Clone,
     Self: std::cmp::PartialEq,
-    Self: std::cmp::PartialOrd,
 {
 }
 
@@ -91,7 +90,6 @@ impl<T> Regular for T
 where
     T: Clone,
     T: std::cmp::PartialEq,
-    T: std::cmp::PartialOrd,
 {
 }
 

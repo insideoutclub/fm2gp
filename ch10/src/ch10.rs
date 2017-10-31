@@ -21,17 +21,10 @@
 
 extern crate std;
 
-#[derive(PartialEq, Debug, Clone)]
-enum State {
-    First,
-    Last,
-}
-
 pub struct MyIterator<I>
 where
     I: Iterator,
 {
-    state: State,
     value: Option<I::Item>,
     x: I,
 }
@@ -41,7 +34,7 @@ where
     I: Iterator,
 {
     fn eq(&self, _: &Self) -> bool {
-        self.state == State::Last
+        self.value.is_none()
     }
 }
 
@@ -54,9 +47,6 @@ where
     type DifferenceType = isize;
     fn successor(&mut self) {
         self.value = self.x.next();
-        if self.value.is_none() {
-            self.state = State::Last;
-        }
     }
     fn source(&self) -> Self::ValueType {
         self.value.clone().unwrap()
@@ -71,7 +61,6 @@ where
 {
     fn clone(&self) -> Self {
         Self {
-            state: self.state.clone(),
             value: self.value.clone(),
             x: self.x.clone(),
         }
@@ -82,32 +71,19 @@ pub fn begin<I>(mut x: I) -> MyIterator<I>
 where
     I: Iterator,
 {
-    let value = x.next();
-    MyIterator {
-        state: if value.is_some() {
-            State::First
-        } else {
-            State::Last
-        },
-        value,
-        x,
-    }
+    MyIterator { value: x.next(), x }
 }
 
 pub fn end<I>(x: I) -> MyIterator<I>
 where
     I: Iterator,
 {
-    MyIterator {
-        state: State::Last,
-        value: None,
-        x,
-    }
+    MyIterator { value: None, x }
 }
 
 pub trait InputIterator
 where
-    Self: std::cmp::PartialEq,
+    Self: PartialEq,
 {
     type ValueType;
     type DifferenceType;
