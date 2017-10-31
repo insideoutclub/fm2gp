@@ -63,69 +63,6 @@ where
     }
 }
 
-/*
-#[derive(Clone, PartialEq)]
-pub struct Wrapper<I>
-where
-    I: ExactSizeIterator,
-    I: PartialEq,
-{
-    x: I,
-}
-
-impl<I> PartialEq for Wrapper<I>
-where
-    I: ExactSizeIterator,
-{
-    fn eq(&self, other: &Self) -> bool
-    {
-        self.x == other.x
-    }
-}
-
-impl<I> InputIterator for Wrapper<I>
-where
-    I: ExactSizeIterator,
-{
-    type ValueType = I::Item;
-    type DifferenceType = isize;
-    fn successor(&mut self) {
-        self.value = self.x.next();
-        if self.value.is_none() {
-            self.state = State::Last;
-        }
-    }
-    fn source(&self) -> Self::ValueType {
-        self.value.clone().unwrap()
-    }
-}
-
-impl<I> Clone for Wrapper<I>
-where
-    I: ExactSizeIterator,
-{
-    fn clone(&self) -> Self
-    {}
-}
-
-impl<I> Iterator for Wrapper<I>
-where
-    I: ExactSizeIterator,
-{
-    type Item = I::Item;
-    fn next(&mut self) -> Option<Self::Item>
-    {
-        self.next()
-    }
-}
-
-impl<I> ExactSizeIterator for Wrapper<I>
-where
-    I: ExactSizeIterator
-{
-}
-*/
-
 impl<I> Clone for MyIterator<I>
 where
     I: Iterator,
@@ -195,7 +132,79 @@ where
 pub trait RandomAccessIterator
 where
     Self: ForwardIterator,
+    Self: std::ops::Sub<Output = usize>,
+    Self: std::ops::AddAssign<usize>,
 {
+}
+
+impl<T> RandomAccessIterator for T
+where
+    T: ForwardIterator,
+    T: std::ops::Sub<Output = usize>,
+    T: std::ops::AddAssign<usize>,
+{
+}
+
+
+#[derive(Clone)]
+pub struct MyRandomAccessIterator<'a, T>
+where
+    T: 'a,
+    T: Clone,
+{
+    index: usize,
+    slice: &'a [T],
+}
+
+impl<'a, T> MyRandomAccessIterator<'a, T>
+where
+    T: Clone,
+{
+    pub fn new(index: usize, slice: &'a [T]) -> Self {
+        Self { index, slice }
+    }
+}
+
+impl<'a, T> PartialEq for MyRandomAccessIterator<'a, T>
+where
+    T: Clone,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.index == other.index && self.slice.as_ptr() == other.slice.as_ptr()
+    }
+}
+
+impl<'a, T> InputIterator for MyRandomAccessIterator<'a, T>
+where
+    T: Clone,
+{
+    type ValueType = T;
+    type DifferenceType = isize;
+    fn successor(&mut self) {
+        self.index += 1;
+    }
+    fn source(&self) -> Self::ValueType {
+        self.slice[self.index].clone()
+    }
+}
+
+impl<'a, T> std::ops::Sub for MyRandomAccessIterator<'a, T>
+where
+    T: Clone,
+{
+    type Output = usize;
+    fn sub(self, other: Self) -> Self::Output {
+        self.index - other.index
+    }
+}
+
+impl<'a, T> std::ops::AddAssign<usize> for MyRandomAccessIterator<'a, T>
+where
+    T: Clone,
+{
+    fn add_assign(&mut self, n: usize) {
+        self.index += n
+    }
 }
 
 pub trait Predicate<T>
@@ -229,14 +238,13 @@ pub mod fmgp {
         n
     }
 
-    /*
-    pub fn distance_random_access<I>(f: I) -> DifferenceType
+    pub fn distance_random_access<I>(f: I, l: I) -> DifferenceType
     where
         I: ::RandomAccessIterator,
     {
-        f.len()
+        // precondition: valid_range(f, l)
+        l - f
     }
-    */
 
     // Section 10.6
 
@@ -250,11 +258,12 @@ pub mod fmgp {
         }
     }
 
-    /*
-    pub fn advance_random_access<T>(x: &[T], n: DifferenceType) -> &[T] {
-        &x[n..]
+    pub fn advance_random_access<I>(x: &mut I, n: usize)
+    where
+        I: ::RandomAccessIterator,
+    {
+        *x += n
     }
-    */
 
     // Section 10.7
 

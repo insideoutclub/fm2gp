@@ -41,29 +41,24 @@ fn main() {
     println!("Initial sequence:  1 2 3 4 5");
     println!("vector v and list l initialized to this sequence.");
 
-    let x1 = begin(v.iter());
-    let y1 = end(v.iter());
+    let mut x1 = MyRandomAccessIterator::new(0, v.as_slice());
+    let y1 = MyRandomAccessIterator::new(v.len(), v.as_slice());
     let mut x2 = begin(l.iter());
     let y2 = end(l.iter());
     println!("Setting x1 = begin(v); y1 = end(v)");
     println!("Setting x2 = begin(l); y2 = end(l)");
 
-    /*
     println!(
         "fmgp::distance(x1, y1) is {}",
-        fmgp::distance_random_access(Wrapper {x: v.iter()})
+        fmgp::distance_random_access(x1.clone(), y1.clone())
     );
-    */
     println!(
         "fmgp::distance(x2, y2) is {}",
         fmgp::distance_input(x2, &y2)
     );
-    /*
-    x1 = fmgp::advance_random_access(x1, 3);
+    fmgp::advance_random_access(&mut x1, 3);
     print!("After advance(x1, 3): ");
     println!("(x1 == y1) is {}", if x1 == y1 { 1 } else { 0 });
-    x2 = l.iter();
-    */
     x2 = begin(l.iter());
     fmgp::advance_input(&mut x2, 3);
     print!("After advance(x2, 3): ");
