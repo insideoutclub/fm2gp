@@ -26,8 +26,16 @@ fn equal_3(x: &&i32) -> bool {
     **x == 3
 }
 
+fn foo(x: &i32) -> bool {
+    *x == 3
+}
+
 fn less_3(x: &&i32) -> bool {
     **x < 3
+}
+
+fn bar(x: &i32) -> bool {
+    *x < 3
 }
 
 fn main() {
@@ -42,9 +50,9 @@ fn main() {
     println!("vector v and list l initialized to this sequence.");
 
     let mut x1 = MyRandomAccessIterator::new(0, v.as_slice());
-    let y1 = MyRandomAccessIterator::new(v.len(), v.as_slice());
+    let mut y1 = MyRandomAccessIterator::new(v.len(), v.as_slice());
     let mut x2 = begin(l.iter());
-    let y2 = end(l.iter());
+    let mut y2 = end(l.iter());
     println!("Setting x1 = begin(v); y1 = end(v)");
     println!("Setting x2 = begin(l); y2 = end(l)");
 
@@ -64,73 +72,59 @@ fn main() {
     print!("After advance(x2, 3): ");
     println!("(x2 == y2) is {}\n", if x2 == y2 { 1 } else { 0 });
 
-    /*
-    x1 = &v[..];
-    */
+    x1 = MyRandomAccessIterator::new(0, v.as_slice());
+    y1 = MyRandomAccessIterator::new(v.len(), v.as_slice());
     x2 = begin(l.iter());
+    y2 = end(l.iter());
     println!("Setting x1 = begin(v); y1 = end(v)");
     println!("Setting x2 = begin(l); y2 = end(l)");
 
-    /*
     println!(
         "*fmgp::find_if(x1, y1, equal_3) is {}",
-        fmgp::find_if(&mut x1.iter(), equal_3).unwrap()
+        fmgp::find_if(x1.clone(), &y1, foo).source()
     );
-    */
     println!(
         "*fmgp::find_if(x2, y2, equal_3) is {}",
         fmgp::find_if(x2, &y2, equal_3).source()
     );
-    /*
     println!(
         "*fmgp::find_if_n(x1, 5, equal_3).first is {}",
-        fmgp::find_if_n(&mut x1.iter(), 3, equal_3).0.unwrap()
+        fmgp::find_if_n(x1.clone(), 3, foo).0.source()
     );
-    */
     println!(
         "*fmgp::find_if_n(x2, 5, equal_3).first is {}",
         fmgp::find_if_n(begin(l.iter()), 3, equal_3).0.source()
     );
 
-    /*
     println!(
         "*fmgp::partition_point(x1, y1, less_3) is {}",
-        fmgp::partition_point(x1.iter(), less_3).next().unwrap()
+        fmgp::partition_point(x1.clone(), &y1, bar).source()
     );
-    */
     println!(
         "*fmgp::partition_point(x2, y2, less_3) is {}",
         fmgp::partition_point(begin(l.iter()), &y2, less_3).source()
     );
-    /*
     println!(
         "*fmgp::partition_point_n(x1, 5, less_3) is {}",
-        fmgp::partition_point_n(x1.iter(), 3, less_3)
-            .next()
-            .unwrap()
+        fmgp::partition_point_n(x1.clone(), 3, bar).source()
     );
-    */
     println!(
         "*fmgp::partition_point_n(x2, 5, less_3) is {}",
         fmgp::partition_point_n(begin(l.iter()), 3, less_3).source()
     );
-    /*
     println!(
         "*fmgp::upper_bound(x1, y1, 2) is {}",
-        fmgp::upper_bound(x1.iter(), &&2).next().unwrap()
+        fmgp::upper_bound(x1.clone(), &y1, &2).source()
     );
-    */
     println!(
         "*fmgp::upper_bound(x2, y2, 2) is {}",
         fmgp::upper_bound(begin(l.iter()), &y2, &&2).source()
     );
 
-    /*
     println!(
         "*fmgp::lower_bound(x1, y1, 2) is {}",
-        fmgp::lower_bound(x1.iter(), &&2).next().unwrap()
+        fmgp::lower_bound(x1, &y1, &2).source()
     );
-    */
     println!(
         "*fmgp::lower_bound(x2, y2, 2) is {}",
         fmgp::lower_bound(begin(l.iter()), &y2, &&2).source()
