@@ -51,7 +51,6 @@ where
 impl<I> InputIterator for MyIterator<I>
 where
     I: Iterator,
-    I::Item: Clone,
 {
     type ValueType = I::Item;
     type DifferenceType = isize;
@@ -133,44 +132,31 @@ where
 pub struct MyRandomAccessIterator<'a, T>
 where
     T: 'a,
-    T: Clone,
 {
     index: usize,
     slice: &'a [T],
 }
 
-impl<'a, T> MyRandomAccessIterator<'a, T>
-where
-    T: Clone,
-{
+impl<'a, T> MyRandomAccessIterator<'a, T> {
     pub fn new(index: usize, slice: &'a [T]) -> Self {
         Self { index, slice }
     }
 }
 
-impl<'a, T> std::ops::Deref for MyRandomAccessIterator<'a, T>
-where
-    T: Clone,
-{
+impl<'a, T> std::ops::Deref for MyRandomAccessIterator<'a, T> {
     type Target = T;
     fn deref(&self) -> &Self::Target {
         &self.slice[self.index]
     }
 }
 
-impl<'a, T> PartialEq for MyRandomAccessIterator<'a, T>
-where
-    T: Clone,
-{
+impl<'a, T> PartialEq for MyRandomAccessIterator<'a, T> {
     fn eq(&self, other: &Self) -> bool {
         self.index == other.index && self.slice.as_ptr() == other.slice.as_ptr()
     }
 }
 
-impl<'a, T> InputIterator for MyRandomAccessIterator<'a, T>
-where
-    T: Clone,
-{
+impl<'a, T> InputIterator for MyRandomAccessIterator<'a, T> {
     type ValueType = T;
     type DifferenceType = isize;
     fn successor(&mut self) {
@@ -178,20 +164,14 @@ where
     }
 }
 
-impl<'a, T> std::ops::Sub for MyRandomAccessIterator<'a, T>
-where
-    T: Clone,
-{
+impl<'a, T> std::ops::Sub for MyRandomAccessIterator<'a, T> {
     type Output = usize;
     fn sub(self, other: Self) -> Self::Output {
         self.index - other.index
     }
 }
 
-impl<'a, T> std::ops::AddAssign<usize> for MyRandomAccessIterator<'a, T>
-where
-    T: Clone,
-{
+impl<'a, T> std::ops::AddAssign<usize> for MyRandomAccessIterator<'a, T> {
     fn add_assign(&mut self, n: usize) {
         self.index += n
     }
