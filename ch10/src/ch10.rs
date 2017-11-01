@@ -21,6 +21,7 @@
 
 extern crate std;
 
+#[derive(Clone)]
 pub struct MyIterator<I>
 where
     I: Iterator,
@@ -59,6 +60,7 @@ where
     }
 }
 
+/*
 impl<I> Clone for MyIterator<I>
 where
     I: Iterator,
@@ -72,6 +74,7 @@ where
         }
     }
 }
+*/
 
 pub fn begin<I>(mut x: I) -> MyIterator<I>
 where
