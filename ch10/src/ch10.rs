@@ -88,27 +88,16 @@ where
 }
 
 #[derive(Clone)]
-pub struct ValueAndIterator<I>
-where
-    I: std::iter::Iterator,
-{
-    value: I::Item,
-    iterator: I,
-}
-
-#[derive(Clone)]
 pub struct IteratorAdapter<I>
 where
     I: std::iter::Iterator,
-    I::Item: Clone,
 {
-    value_and_iterator: Option<ValueAndIterator<I>>,
+    value_and_iterator: Option<(I::Item, I)>,
 }
 
 impl<I> PartialEq for IteratorAdapter<I>
 where
     I: std::iter::Iterator,
-    I::Item: Clone,
 {
     fn eq(&self, _: &Self) -> bool {
         self.value_and_iterator.is_none()
@@ -118,16 +107,15 @@ where
 impl<I> Iterator for IteratorAdapter<I>
 where
     I: std::iter::Iterator,
-    I::Item: Clone,
 {
     type DifferenceType = isize;
     fn successor(&mut self) {
         let next_is_none = {
-            let iterator_and_value = self.value_and_iterator.as_mut().unwrap();
-            match iterator_and_value.iterator.next() {
+            let &mut (ref mut value, ref mut iterator) = self.value_and_iterator.as_mut().unwrap();
+            match iterator.next() {
                 None => true,
-                Some(value) => {
-                    iterator_and_value.value = value;
+                Some(x) => {
+                    *value = x;
                     false
                 }
             }
@@ -145,7 +133,7 @@ where
 {
     type Target = I::Item;
     fn deref(&self) -> &Self::Target {
-        &self.value_and_iterator.as_ref().unwrap().value
+        &self.value_and_iterator.as_ref().unwrap().0
     }
 }
 
@@ -159,7 +147,7 @@ where
             value_and_iterator: None,
         },
         Some(value) => IteratorAdapter {
-            value_and_iterator: Some(ValueAndIterator { value, iterator }),
+            value_and_iterator: Some((value, iterator)),
         },
     }
 }
