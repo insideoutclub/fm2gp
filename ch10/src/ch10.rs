@@ -19,10 +19,28 @@
 // ch10.rs -- Functions from Chapter 10 of fM2GP.
 // -------------------------------------------------------------------
 
+extern crate num_integer;
+extern crate num_traits;
 extern crate std;
 
+pub trait Integer
+where
+    Self: num_integer::Integer,
+    Self: std::ops::Shr<Self, Output = Self>,
+    Self: Clone,
+{
+}
+
+impl<T> Integer for T
+where
+    T: num_integer::Integer,
+    T: std::ops::Shr<T, Output = T>,
+    T: Clone,
+{
+}
+
 pub trait Iterator {
-    type DifferenceType;
+    type DifferenceType: Integer;
     fn successor(&mut self);
 }
 
@@ -108,7 +126,7 @@ impl<I> Iterator for IteratorAdapter<I>
 where
     I: std::iter::Iterator,
 {
-    type DifferenceType = isize;
+    type DifferenceType = usize;
     fn successor(&mut self) {
         let next_is_none = {
             let &mut (ref mut value, ref mut iterator) = self.value_and_iterator.as_mut().unwrap();
@@ -173,7 +191,7 @@ pub fn end_random_access<'a, T>(slice: &'a [T]) -> SliceAdapter<'a, T> {
 }
 
 impl<'a, T> Iterator for SliceAdapter<'a, T> {
-    type DifferenceType = isize;
+    type DifferenceType = usize;
     fn successor(&mut self) {
         self.index += 1;
     }
@@ -203,37 +221,36 @@ pub mod fmgp {
 
     // Section 10.5
 
-    type DifferenceType = usize;
-
-    pub fn distance_input<I>(mut f: I, l: &I) -> DifferenceType
+    pub fn distance_input<I>(mut f: I, l: &I) -> I::DifferenceType
     where
         I: ::InputIterator,
     {
         // precondition: valid_range(f, l)
-        let mut n = 0;
+        let mut n = ::ch10::num_traits::zero();
         while &f != l {
             f.successor();
-            n += 1;
+            n = n + ::ch10::num_traits::one();
         }
         n
     }
 
-    pub fn distance_random_access<I>(f: I, l: I) -> DifferenceType
+    pub fn distance_random_access<I>(f: I, l: I) -> I::DifferenceType
     where
         I: ::RandomAccessIterator,
+        I::DifferenceType: From<usize>,
     {
         // precondition: valid_range(f, l)
-        l - f
+        I::DifferenceType::from(l - f)
     }
 
     // Section 10.6
 
-    pub fn advance_input<I>(x: &mut I, mut n: DifferenceType)
+    pub fn advance_input<I>(x: &mut I, mut n: I::DifferenceType)
     where
         I: ::InputIterator,
     {
-        while n != 0 {
-            n -= 1;
+        while n != ::ch10::num_traits::zero() {
+            n = n - ::ch10::num_traits::one();
             x.successor();
         }
     }
@@ -259,37 +276,37 @@ pub mod fmgp {
         f
     }
 
-    pub fn find_if_n<I, P>(mut f: I, mut n: DifferenceType, mut p: P) -> (I, DifferenceType)
+    pub fn find_if_n<I, P>(mut f: I, mut n: I::DifferenceType, mut p: P) -> (I, I::DifferenceType)
     where
         I: ::InputIterator,
         P: ::Predicate<I::Target>,
         I::Target: Sized,
     {
-        while n != 0 && !p(&*f) {
+        while n != ::ch10::num_traits::zero() && !p(&*f) {
             f.successor();
-            n -= 1;
+            n = n - ::ch10::num_traits::one();
         }
         (f, n)
     }
 
     // Section 10.8
 
-    pub fn partition_point_n<I, P>(mut f: I, mut n: DifferenceType, mut p: P) -> I
+    pub fn partition_point_n<I, P>(mut f: I, mut n: I::DifferenceType, mut p: P) -> I
     where
         I: ::ForwardIterator,
         P: ::Predicate<I::Target>,
         I::Target: Sized,
     {
-        while n != 0 {
+        while n != ::ch10::num_traits::zero() {
             let mut middle = f.clone();
-            let half = n >> 1;
-            advance_input(&mut middle, half);
+            let half = n.clone() >> ::ch10::num_traits::one();
+            advance_input(&mut middle, half.clone());
             if !p(&*middle) {
                 n = half;
             } else {
                 middle.successor();
                 f = middle;
-                n -= half + 1;
+                n = n - (half + ::ch10::num_traits::one());
             }
         }
         f
