@@ -24,7 +24,7 @@ extern crate std;
 #[derive(Clone)]
 pub struct MyIterator<I>
 where
-    I: Iterator,
+    I: std::iter::Iterator,
 {
     value: Option<I::Item>,
     x: I,
@@ -32,7 +32,7 @@ where
 
 impl<I> std::ops::Deref for MyIterator<I>
 where
-    I: Iterator,
+    I: std::iter::Iterator,
 {
     type Target = I::Item;
     fn deref(&self) -> &Self::Target {
@@ -42,16 +42,16 @@ where
 
 impl<I> PartialEq for MyIterator<I>
 where
-    I: Iterator,
+    I: std::iter::Iterator,
 {
     fn eq(&self, _: &Self) -> bool {
         self.value.is_none()
     }
 }
 
-impl<I> Successor for MyIterator<I>
+impl<I> Iterator for MyIterator<I>
 where
-    I: Iterator,
+    I: std::iter::Iterator,
 {
     type DifferenceType = isize;
     fn successor(&mut self) {
@@ -61,19 +61,19 @@ where
 
 pub fn begin<I>(mut x: I) -> MyIterator<I>
 where
-    I: Iterator,
+    I: std::iter::Iterator,
 {
     MyIterator { value: x.next(), x }
 }
 
 pub fn end<I>(x: I) -> MyIterator<I>
 where
-    I: Iterator,
+    I: std::iter::Iterator,
 {
     MyIterator { value: None, x }
 }
 
-pub trait Successor {
+pub trait Iterator {
     type DifferenceType;
     fn successor(&mut self);
 }
@@ -82,7 +82,7 @@ pub trait InputIterator
 where
     Self: PartialEq,
     Self: std::ops::Deref,
-    Self: Successor,
+    Self: Iterator,
 {
     type ValueType;
 }
@@ -91,7 +91,7 @@ impl<I> InputIterator for I
 where
     I: PartialEq,
     I: std::ops::Deref,
-    I: Successor,
+    I: Iterator,
     I::Target: Sized,
 {
     type ValueType = I::Target;
@@ -150,7 +150,7 @@ impl<'a, T> std::ops::Deref for MyRandomAccessIterator<'a, T> {
     }
 }
 
-impl<'a, T> Successor for MyRandomAccessIterator<'a, T> {
+impl<'a, T> Iterator for MyRandomAccessIterator<'a, T> {
     type DifferenceType = isize;
     fn successor(&mut self) {
         self.index += 1;
