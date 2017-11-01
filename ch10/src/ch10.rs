@@ -129,7 +129,6 @@ where
 impl<I> std::ops::Deref for IteratorAdapter<I>
 where
     I: std::iter::Iterator,
-    I::Item: Clone,
 {
     type Target = I::Item;
     fn deref(&self) -> &Self::Target {
@@ -140,22 +139,15 @@ where
 pub fn begin<I>(mut iterator: I) -> IteratorAdapter<I>
 where
     I: std::iter::Iterator,
-    I::Item: Clone,
 {
-    match iterator.next() {
-        None => IteratorAdapter {
-            value_and_iterator: None,
-        },
-        Some(value) => IteratorAdapter {
-            value_and_iterator: Some((value, iterator)),
-        },
+    IteratorAdapter {
+        value_and_iterator: iterator.next().and_then(|value| Some((value, iterator))),
     }
 }
 
 pub fn end<I>(_: I) -> IteratorAdapter<I>
 where
     I: std::iter::Iterator,
-    I::Item: Clone,
 {
     IteratorAdapter {
         value_and_iterator: None,
