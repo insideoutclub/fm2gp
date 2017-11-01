@@ -21,58 +21,6 @@
 
 extern crate std;
 
-#[derive(Clone)]
-pub struct MyIterator<I>
-where
-    I: std::iter::Iterator,
-{
-    value: Option<I::Item>,
-    x: I,
-}
-
-impl<I> std::ops::Deref for MyIterator<I>
-where
-    I: std::iter::Iterator,
-{
-    type Target = I::Item;
-    fn deref(&self) -> &Self::Target {
-        self.value.as_ref().unwrap()
-    }
-}
-
-impl<I> PartialEq for MyIterator<I>
-where
-    I: std::iter::Iterator,
-{
-    fn eq(&self, _: &Self) -> bool {
-        self.value.is_none()
-    }
-}
-
-impl<I> Iterator for MyIterator<I>
-where
-    I: std::iter::Iterator,
-{
-    type DifferenceType = isize;
-    fn successor(&mut self) {
-        self.value = self.x.next();
-    }
-}
-
-pub fn begin<I>(mut x: I) -> MyIterator<I>
-where
-    I: std::iter::Iterator,
-{
-    MyIterator { value: x.next(), x }
-}
-
-pub fn end<I>(x: I) -> MyIterator<I>
-where
-    I: std::iter::Iterator,
-{
-    MyIterator { value: None, x }
-}
-
 pub trait Iterator {
     type DifferenceType;
     fn successor(&mut self);
@@ -81,8 +29,8 @@ pub trait Iterator {
 pub trait InputIterator
 where
     Self: PartialEq,
-    Self: std::ops::Deref,
     Self: Iterator,
+    Self: std::ops::Deref,
 {
     type ValueType;
 }
@@ -90,8 +38,8 @@ where
 impl<I> InputIterator for I
 where
     I: PartialEq,
-    I: std::ops::Deref,
     I: Iterator,
+    I: std::ops::Deref,
     I::Target: Sized,
 {
     type ValueType = I::Target;
@@ -127,49 +75,6 @@ where
 {
 }
 
-
-#[derive(Clone, PartialEq)]
-pub struct MyRandomAccessIterator<'a, T>
-where
-    T: 'a,
-{
-    index: usize,
-    slice: &'a [T],
-}
-
-impl<'a, T> MyRandomAccessIterator<'a, T> {
-    pub fn new(index: usize, slice: &'a [T]) -> Self {
-        Self { index, slice }
-    }
-}
-
-impl<'a, T> std::ops::Deref for MyRandomAccessIterator<'a, T> {
-    type Target = T;
-    fn deref(&self) -> &Self::Target {
-        &self.slice[self.index]
-    }
-}
-
-impl<'a, T> Iterator for MyRandomAccessIterator<'a, T> {
-    type DifferenceType = isize;
-    fn successor(&mut self) {
-        self.index += 1;
-    }
-}
-
-impl<'a, T> std::ops::Sub for MyRandomAccessIterator<'a, T> {
-    type Output = usize;
-    fn sub(self, other: Self) -> Self::Output {
-        self.index - other.index
-    }
-}
-
-impl<'a, T> std::ops::AddAssign<usize> for MyRandomAccessIterator<'a, T> {
-    fn add_assign(&mut self, n: usize) {
-        self.index += n
-    }
-}
-
 pub trait Predicate<T>
 where
     Self: FnMut(&T) -> bool,
@@ -180,6 +85,107 @@ impl<T, U> Predicate<U> for T
 where
     T: FnMut(&U) -> bool,
 {
+}
+
+#[derive(Clone)]
+pub struct IteratorAdapter<I>
+where
+    I: std::iter::Iterator,
+{
+    value: Option<I::Item>,
+    iterator: I,
+}
+
+impl<I> std::ops::Deref for IteratorAdapter<I>
+where
+    I: std::iter::Iterator,
+{
+    type Target = I::Item;
+    fn deref(&self) -> &Self::Target {
+        self.value.as_ref().unwrap()
+    }
+}
+
+impl<I> PartialEq for IteratorAdapter<I>
+where
+    I: std::iter::Iterator,
+{
+    fn eq(&self, _: &Self) -> bool {
+        self.value.is_none()
+    }
+}
+
+impl<I> Iterator for IteratorAdapter<I>
+where
+    I: std::iter::Iterator,
+{
+    type DifferenceType = isize;
+    fn successor(&mut self) {
+        self.value = self.iterator.next();
+    }
+}
+
+pub fn begin<I>(mut iterator: I) -> IteratorAdapter<I>
+where
+    I: std::iter::Iterator,
+{
+    IteratorAdapter {
+        value: iterator.next(),
+        iterator,
+    }
+}
+
+pub fn end<I>(iterator: I) -> IteratorAdapter<I>
+where
+    I: std::iter::Iterator,
+{
+    IteratorAdapter {
+        value: None,
+        iterator,
+    }
+}
+
+
+#[derive(Clone, PartialEq)]
+pub struct SliceAdapter<'a, T>
+where
+    T: 'a,
+{
+    index: usize,
+    slice: &'a [T],
+}
+
+impl<'a, T> SliceAdapter<'a, T> {
+    pub fn new(index: usize, slice: &'a [T]) -> Self {
+        Self { index, slice }
+    }
+}
+
+impl<'a, T> std::ops::Deref for SliceAdapter<'a, T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.slice[self.index]
+    }
+}
+
+impl<'a, T> Iterator for SliceAdapter<'a, T> {
+    type DifferenceType = isize;
+    fn successor(&mut self) {
+        self.index += 1;
+    }
+}
+
+impl<'a, T> std::ops::Sub for SliceAdapter<'a, T> {
+    type Output = usize;
+    fn sub(self, other: Self) -> Self::Output {
+        self.index - other.index
+    }
+}
+
+impl<'a, T> std::ops::AddAssign<usize> for SliceAdapter<'a, T> {
+    fn add_assign(&mut self, n: usize) {
+        self.index += n
+    }
 }
 
 pub mod fmgp {
