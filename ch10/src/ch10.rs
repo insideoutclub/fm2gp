@@ -88,60 +88,90 @@ where
 }
 
 #[derive(Clone)]
-pub struct IteratorAdapter<I>
+pub struct ValueAndIterator<I>
 where
     I: std::iter::Iterator,
 {
-    value: Option<I::Item>,
+    value: I::Item,
     iterator: I,
+}
+
+#[derive(Clone)]
+pub struct IteratorAdapter<I>
+where
+    I: std::iter::Iterator,
+    I::Item: Clone,
+{
+    value_and_iterator: Option<ValueAndIterator<I>>,
 }
 
 impl<I> PartialEq for IteratorAdapter<I>
 where
     I: std::iter::Iterator,
+    I::Item: Clone,
 {
     fn eq(&self, _: &Self) -> bool {
-        self.value.is_none()
+        self.value_and_iterator.is_none()
     }
 }
 
 impl<I> Iterator for IteratorAdapter<I>
 where
     I: std::iter::Iterator,
+    I::Item: Clone,
 {
     type DifferenceType = isize;
     fn successor(&mut self) {
-        self.value = self.iterator.next();
+        let mut is_none = false;
+        {
+            let iterator_and_value = self.value_and_iterator.as_mut().unwrap();
+            let iterator = &mut iterator_and_value.iterator;
+            let value_wrapper = iterator.next();
+            if value_wrapper.is_none() {
+                is_none = true
+            } else {
+                iterator_and_value.value = value_wrapper.unwrap();
+            }
+        }
+        if is_none {
+            self.value_and_iterator = None
+        }
     }
 }
 
 impl<I> std::ops::Deref for IteratorAdapter<I>
 where
     I: std::iter::Iterator,
+    I::Item: Clone,
 {
     type Target = I::Item;
     fn deref(&self) -> &Self::Target {
-        self.value.as_ref().unwrap()
+        &self.value_and_iterator.as_ref().unwrap().value
     }
 }
 
 pub fn begin<I>(mut iterator: I) -> IteratorAdapter<I>
 where
     I: std::iter::Iterator,
+    I::Item: Clone,
 {
-    IteratorAdapter {
-        value: iterator.next(),
-        iterator,
+    match iterator.next() {
+        None => IteratorAdapter {
+            value_and_iterator: None,
+        },
+        Some(value) => IteratorAdapter {
+            value_and_iterator: Some(ValueAndIterator { value, iterator }),
+        },
     }
 }
 
-pub fn end<I>(iterator: I) -> IteratorAdapter<I>
+pub fn end<I>(_: I) -> IteratorAdapter<I>
 where
     I: std::iter::Iterator,
+    I::Item: Clone,
 {
     IteratorAdapter {
-        value: None,
-        iterator,
+        value_and_iterator: None,
     }
 }
 
