@@ -125,12 +125,9 @@ where
         let mut is_none = false;
         {
             let iterator_and_value = self.value_and_iterator.as_mut().unwrap();
-            let iterator = &mut iterator_and_value.iterator;
-            let value_wrapper = iterator.next();
-            if value_wrapper.is_none() {
-                is_none = true
-            } else {
-                iterator_and_value.value = value_wrapper.unwrap();
+            match iterator_and_value.iterator.next() {
+                None => is_none = true,
+                Some(value) => iterator_and_value.value = value,
             }
         }
         if is_none {
