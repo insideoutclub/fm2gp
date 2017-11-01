@@ -128,7 +128,7 @@ where
 }
 
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct MyRandomAccessIterator<'a, T>
 where
     T: 'a,
@@ -147,12 +147,6 @@ impl<'a, T> std::ops::Deref for MyRandomAccessIterator<'a, T> {
     type Target = T;
     fn deref(&self) -> &Self::Target {
         &self.slice[self.index]
-    }
-}
-
-impl<'a, T> PartialEq for MyRandomAccessIterator<'a, T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.index == other.index && self.slice.as_ptr() == other.slice.as_ptr()
     }
 }
 
