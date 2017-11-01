@@ -96,16 +96,6 @@ where
     iterator: I,
 }
 
-impl<I> std::ops::Deref for IteratorAdapter<I>
-where
-    I: std::iter::Iterator,
-{
-    type Target = I::Item;
-    fn deref(&self) -> &Self::Target {
-        self.value.as_ref().unwrap()
-    }
-}
-
 impl<I> PartialEq for IteratorAdapter<I>
 where
     I: std::iter::Iterator,
@@ -122,6 +112,16 @@ where
     type DifferenceType = isize;
     fn successor(&mut self) {
         self.value = self.iterator.next();
+    }
+}
+
+impl<I> std::ops::Deref for IteratorAdapter<I>
+where
+    I: std::iter::Iterator,
+{
+    type Target = I::Item;
+    fn deref(&self) -> &Self::Target {
+        self.value.as_ref().unwrap()
     }
 }
 
@@ -161,17 +161,17 @@ impl<'a, T> SliceAdapter<'a, T> {
     }
 }
 
-impl<'a, T> std::ops::Deref for SliceAdapter<'a, T> {
-    type Target = T;
-    fn deref(&self) -> &Self::Target {
-        &self.slice[self.index]
-    }
-}
-
 impl<'a, T> Iterator for SliceAdapter<'a, T> {
     type DifferenceType = isize;
     fn successor(&mut self) {
         self.index += 1;
+    }
+}
+
+impl<'a, T> std::ops::Deref for SliceAdapter<'a, T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.slice[self.index]
     }
 }
 
