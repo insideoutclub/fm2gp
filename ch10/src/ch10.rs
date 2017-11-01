@@ -161,9 +161,14 @@ where
     slice: &'a [T],
 }
 
-impl<'a, T> SliceAdapter<'a, T> {
-    pub fn new(index: usize, slice: &'a [T]) -> Self {
-        Self { index, slice }
+pub fn begin_random_access<'a, T>(slice: &'a [T]) -> SliceAdapter<'a, T> {
+    SliceAdapter { index: 0, slice }
+}
+
+pub fn end_random_access<'a, T>(slice: &'a [T]) -> SliceAdapter<'a, T> {
+    SliceAdapter {
+        index: slice.len(),
+        slice,
     }
 }
 

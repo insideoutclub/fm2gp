@@ -49,8 +49,8 @@ fn main() {
     println!("Initial sequence:  1 2 3 4 5");
     println!("vector v and list l initialized to this sequence.");
 
-    let mut x1 = SliceAdapter::new(0, v.as_slice());
-    let mut y1 = SliceAdapter::new(v.len(), v.as_slice());
+    let mut x1 = begin_random_access(v.as_slice());
+    let mut y1 = end_random_access(v.as_slice());
     let mut x2 = begin(l.iter());
     let mut y2 = end(l.iter());
     println!("Setting x1 = begin(v); y1 = end(v)");
@@ -72,8 +72,8 @@ fn main() {
     print!("After advance(x2, 3): ");
     println!("(x2 == y2) is {}\n", if x2 == y2 { 1 } else { 0 });
 
-    x1 = SliceAdapter::new(0, v.as_slice());
-    y1 = SliceAdapter::new(v.len(), v.as_slice());
+    x1 = begin_random_access(v.as_slice());
+    y1 = end_random_access(v.as_slice());
     x2 = begin(l.iter());
     y2 = end(l.iter());
     println!("Setting x1 = begin(v); y1 = end(v)");
