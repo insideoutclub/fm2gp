@@ -112,13 +112,10 @@ where
     fn successor(&mut self) {
         let next_is_none = {
             let &mut (ref mut value, ref mut iterator) = self.value_and_iterator.as_mut().unwrap();
-            match iterator.next() {
-                None => true,
-                Some(x) => {
-                    *value = x;
-                    false
-                }
-            }
+            iterator.next().map_or(true, |x| {
+                *value = x;
+                false
+            })
         };
         if next_is_none {
             self.value_and_iterator = None
