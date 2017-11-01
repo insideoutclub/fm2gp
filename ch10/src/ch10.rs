@@ -122,15 +122,17 @@ where
 {
     type DifferenceType = isize;
     fn successor(&mut self) {
-        let mut is_none = false;
-        {
+        let next_is_none = {
             let iterator_and_value = self.value_and_iterator.as_mut().unwrap();
             match iterator_and_value.iterator.next() {
-                None => is_none = true,
-                Some(value) => iterator_and_value.value = value,
+                None => true,
+                Some(value) => {
+                    iterator_and_value.value = value;
+                    false
+                }
             }
-        }
-        if is_none {
+        };
+        if next_is_none {
             self.value_and_iterator = None
         }
     }
