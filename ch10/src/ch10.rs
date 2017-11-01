@@ -49,32 +49,15 @@ where
     }
 }
 
-impl<I> InputIterator for MyIterator<I>
+impl<I> Successor for MyIterator<I>
 where
     I: Iterator,
 {
-    type ValueType = I::Item;
     type DifferenceType = isize;
     fn successor(&mut self) {
         self.value = self.x.next();
     }
 }
-
-/*
-impl<I> Clone for MyIterator<I>
-where
-    I: Iterator,
-    I::Item: Clone,
-    I: Clone,
-{
-    fn clone(&self) -> Self {
-        Self {
-            value: self.value.clone(),
-            x: self.x.clone(),
-        }
-    }
-}
-*/
 
 pub fn begin<I>(mut x: I) -> MyIterator<I>
 where
@@ -90,14 +73,28 @@ where
     MyIterator { value: None, x }
 }
 
+pub trait Successor {
+    type DifferenceType;
+    fn successor(&mut self);
+}
+
 pub trait InputIterator
 where
     Self: PartialEq,
     Self: std::ops::Deref,
+    Self: Successor,
 {
     type ValueType;
-    type DifferenceType;
-    fn successor(&mut self);
+}
+
+impl<I> InputIterator for I
+where
+    I: PartialEq,
+    I: std::ops::Deref,
+    I: Successor,
+    I::Target: Sized,
+{
+    type ValueType = I::Target;
 }
 
 pub trait ForwardIterator
@@ -159,8 +156,7 @@ impl<'a, T> PartialEq for MyRandomAccessIterator<'a, T> {
     }
 }
 
-impl<'a, T> InputIterator for MyRandomAccessIterator<'a, T> {
-    type ValueType = T;
+impl<'a, T> Successor for MyRandomAccessIterator<'a, T> {
     type DifferenceType = isize;
     fn successor(&mut self) {
         self.index += 1;
