@@ -43,28 +43,13 @@ pub mod fmgp {
     {
     }
 
-    pub trait Iterator {
-        type DifferenceType: Integer;
-        fn successor(&mut self);
-    }
-
     pub trait InputIterator
     where
         Self: PartialEq,
-        Self: Iterator,
         Self: std::ops::Deref,
     {
-        type ValueType;
-    }
-
-    impl<I> InputIterator for I
-    where
-        I: PartialEq,
-        I: Iterator,
-        I: std::ops::Deref,
-        I::Target: Sized,
-    {
-        type ValueType = I::Target;
+        type DifferenceType: Integer;
+        fn successor(&mut self);
     }
 
     pub trait ForwardIterator
@@ -126,7 +111,7 @@ pub mod fmgp {
         }
     }
 
-    impl<I> Iterator for IteratorAdapter<I>
+    impl<I> InputIterator for IteratorAdapter<I>
     where
         I: std::iter::Iterator,
     {
@@ -175,13 +160,19 @@ pub mod fmgp {
     }
 
 
-    #[derive(Clone, PartialEq)]
+    #[derive(Clone)]
     pub struct SliceAdapter<'a, T>
     where
         T: 'a,
     {
         index: usize,
         slice: &'a [T],
+    }
+
+    impl<'a, T> PartialEq for SliceAdapter<'a, T> {
+        fn eq(&self, other: &Self) -> bool {
+            self.index == other.index
+        }
     }
 
     pub fn begin_random_access<'a, T>(slice: &'a [T]) -> SliceAdapter<'a, T> {
@@ -195,7 +186,7 @@ pub mod fmgp {
         }
     }
 
-    impl<'a, T> Iterator for SliceAdapter<'a, T> {
+    impl<'a, T> InputIterator for SliceAdapter<'a, T> {
         type DifferenceType = usize;
         fn successor(&mut self) {
             self.index += 1;
