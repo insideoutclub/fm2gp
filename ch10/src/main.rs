@@ -51,8 +51,8 @@ fn main() {
 
     let mut x1 = fmgp::begin_random_access(v.as_slice());
     let mut y1 = fmgp::end_random_access(v.as_slice());
-    let mut x2 = fmgp::begin(l.iter());
-    let mut y2 = fmgp::end(l.iter());
+    let mut x2 = fmgp::begin(&l);
+    let mut y2 = fmgp::end(&l);
     println!("Setting x1 = begin(v); y1 = end(v)");
     println!("Setting x2 = begin(l); y2 = end(l)");
 
@@ -67,15 +67,15 @@ fn main() {
     fmgp::advance_random_access(&mut x1, 3);
     print!("After advance(x1, 3): ");
     println!("(x1 == y1) is {}", if x1 == y1 { 1 } else { 0 });
-    x2 = fmgp::begin(l.iter());
+    x2 = fmgp::begin(&l);
     fmgp::advance_input(&mut x2, 3);
     print!("After advance(x2, 3): ");
     println!("(x2 == y2) is {}\n", if x2 == y2 { 1 } else { 0 });
 
     x1 = fmgp::begin_random_access(v.as_slice());
     y1 = fmgp::end_random_access(v.as_slice());
-    x2 = fmgp::begin(l.iter());
-    y2 = fmgp::end(l.iter());
+    x2 = fmgp::begin(&l);
+    y2 = fmgp::end(&l);
     println!("Setting x1 = begin(v); y1 = end(v)");
     println!("Setting x2 = begin(l); y2 = end(l)");
 
@@ -102,7 +102,7 @@ fn main() {
     );
     println!(
         "*fmgp::partition_point(x2, y2, less_3) is {}",
-        *fmgp::partition_point(fmgp::begin(l.iter()), &y2, less_3)
+        *fmgp::partition_point(fmgp::begin(&l), &y2, less_3)
     );
     println!(
         "*fmgp::partition_point_n(x1, 5, less_3) is {}",
@@ -118,7 +118,7 @@ fn main() {
     );
     println!(
         "*fmgp::upper_bound(x2, y2, 2) is {}",
-        *fmgp::upper_bound(fmgp::begin(l.iter()), &y2, &&2)
+        *fmgp::upper_bound(fmgp::begin(&l), &y2, &&2)
     );
 
     println!(
@@ -127,6 +127,6 @@ fn main() {
     );
     println!(
         "*fmgp::lower_bound(x2, y2, 2) is {}",
-        *fmgp::lower_bound(fmgp::begin(l.iter()), &y2, &&2)
+        *fmgp::lower_bound(fmgp::begin(&l), &y2, &&2)
     );
 }

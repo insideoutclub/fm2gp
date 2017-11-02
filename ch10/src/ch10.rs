@@ -141,18 +141,19 @@ pub mod fmgp {
         }
     }
 
-    pub fn begin<I>(mut iterator: I) -> IteratorAdapter<I>
+    pub fn begin<I>(into_iter: I) -> IteratorAdapter<I::IntoIter>
     where
-        I: std::iter::Iterator,
+        I: std::iter::IntoIterator,
     {
+        let mut iterator = into_iter.into_iter();
         IteratorAdapter {
             value_and_iterator: iterator.next().and_then(|value| Some((value, iterator))),
         }
     }
 
-    pub fn end<I>(_: I) -> IteratorAdapter<I>
+    pub fn end<I>(_: I) -> IteratorAdapter<I::IntoIter>
     where
-        I: std::iter::Iterator,
+        I: std::iter::IntoIterator,
     {
         IteratorAdapter {
             value_and_iterator: None,
@@ -176,7 +177,10 @@ pub mod fmgp {
     }
 
     pub fn begin_random_access<'a, T>(slice: &'a [T]) -> SliceAdapter<'a, T> {
-        SliceAdapter { index: 0, slice: Some(slice) }
+        SliceAdapter {
+            index: 0,
+            slice: Some(slice),
+        }
     }
 
     pub fn end_random_access<'a, T>(slice: &'a [T]) -> SliceAdapter<'a, T> {
