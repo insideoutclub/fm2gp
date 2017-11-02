@@ -41,12 +41,12 @@ fn main() {
     println!("multiply_group(7, 8) = {}", 8.multiply_group(7));
     println!(
         "power_accumulate_semigroup(1, 2, 10) = {}",
-        power_accumulate_semigroup(1, 2, 10)
+        2.power_accumulate_semigroup(1, 10)
     );
-    println!("power_semigroup(2, 10) = {}", power_semigroup(2, 10));
-    println!("power_monoid(2, 10) = {}", power_monoid(2, 10));
-    println!("power_monoid(2, 0) = {}", power_monoid(2, 0));
-    println!("power_group(2., -10) = {}", power_group(2., -10));
+    println!("power_semigroup(2, 10) = {}", 2.power_semigroup(10));
+    println!("power_monoid(2, 10) = {}", 2.power_monoid(10));
+    println!("power_monoid(2, 0) = {}", 2.power_monoid(0));
+    println!("power_group(2., -10) = {}", (2.).power_group(-10));
     let plus_int = Plus();
     println!(
         "power_accumulate_semigroup(0, 7, 8, plus_int) = {}",
