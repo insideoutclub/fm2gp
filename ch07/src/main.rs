@@ -50,19 +50,19 @@ fn main() {
     let plus_int = Plus();
     println!(
         "power_accumulate_semigroup(0, 7, 8, plus_int) = {}",
-        power_accumulate_semigroup_with_op(0, 7, 8, &plus_int)
+        plus_int.power_accumulate_semigroup(0, 7, 8)
     );
     println!(
         "power_semigroup(7, 8, plus_int) = {}",
-        power_semigroup_with_op(7, 8, &plus_int)
+        plus_int.power_semigroup(7, 8)
     );
     println!(
         "power_monoid(0, 8, plus_int) = {}",
-        power_monoid_with_op(0, 8, &plus_int)
+        plus_int.power_monoid(0, 8)
     );
     println!(
         "power_group(7, -8, plus_int) = {}",
-        power_group_with_op(7, -8, &plus_int)
+        plus_int.power_group(7, -8)
     );
     println!("fib0(5) = {}", fib0(5));
     println!("fibonacci_iterative(5) = {}", fibonacci_iterative(5));
