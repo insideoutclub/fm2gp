@@ -19,133 +19,133 @@
 // ch11.rs -- Functions from Chapter 11 of fM2GP.
 // -------------------------------------------------------------------
 
-extern crate num_integer;
-extern crate num_traits;
-extern crate std;
-
-pub trait InputIterator
-where
-    Self: Iterator,
-{
-}
-
-impl<T> InputIterator for T
-where
-    T: Iterator,
-{
-}
-
-pub trait ForwardIterator
-where
-    Self: InputIterator,
-{
-}
-
-impl<T> ForwardIterator for T
-where
-    T: InputIterator,
-{
-}
-
-pub trait BidirectionalIterator
-where
-    Self: DoubleEndedIterator,
-{
-}
-
-impl<T> BidirectionalIterator for T
-where
-    T: DoubleEndedIterator,
-{
-}
-
-pub trait RandomAccessIterator
-where
-    Self: BidirectionalIterator,
-    Self: ExactSizeIterator,
-{
-}
-
-impl<T> RandomAccessIterator for T
-where
-    T: BidirectionalIterator,
-    T: ExactSizeIterator,
-{
-}
-
-pub trait OutputIterator
-where
-    Self: Iterator,
-{
-}
-
-impl<T> OutputIterator for T
-where
-    T: Iterator,
-{
-}
-
-pub trait Integer
-where
-    Self: num_integer::Integer,
-    Self: std::ops::Shr<Self, Output = Self>,
-    Self: std::ops::ShrAssign,
-    Self: std::ops::SubAssign,
-{
-}
-
-impl<T> Integer for T
-where
-    T: num_integer::Integer,
-    T: std::ops::Shr<T, Output = T>,
-    T: std::ops::ShrAssign,
-    T: std::ops::SubAssign,
-{
-}
-
-pub trait EuclidianDomain
-where
-    Self: num_traits::Num,
-    Self: Clone,
-{
-}
-
-impl<T> EuclidianDomain for T
-where
-    T: num_traits::Num,
-    Self: Clone,
-{
-}
-
-pub trait Transformation
-where
-    Self: Fn(usize) -> usize,
-{
-}
-
-impl<T> Transformation for T
-where
-    T: Fn(usize) -> usize,
-{
-}
-
-type DifferenceType = usize;
-
-fn odd<N>(n: &N) -> bool
-where
-    N: Integer,
-{
-    n.is_odd()
-}
-
-fn _half<N>(n: N) -> N
-where
-    N: Integer,
-{
-    n >> num_traits::one()
-}
-
 pub mod fmgp {
+
+    extern crate num_integer;
+    extern crate num_traits;
+    extern crate std;
+
+    pub trait InputIterator
+    where
+        Self: Iterator,
+    {
+}
+
+    impl<T> InputIterator for T
+    where
+        T: Iterator,
+    {
+    }
+
+    pub trait ForwardIterator
+    where
+        Self: InputIterator,
+    {
+}
+
+    impl<T> ForwardIterator for T
+    where
+        T: InputIterator,
+    {
+    }
+
+    pub trait BidirectionalIterator
+    where
+        Self: DoubleEndedIterator,
+    {
+}
+
+    impl<T> BidirectionalIterator for T
+    where
+        T: DoubleEndedIterator,
+    {
+    }
+
+    pub trait RandomAccessIterator
+    where
+        Self: BidirectionalIterator,
+        Self: ExactSizeIterator,
+    {
+}
+
+    impl<T> RandomAccessIterator for T
+    where
+        T: BidirectionalIterator,
+        T: ExactSizeIterator,
+    {
+    }
+
+    pub trait OutputIterator
+    where
+        Self: Iterator,
+    {
+}
+
+    impl<T> OutputIterator for T
+    where
+        T: Iterator,
+    {
+    }
+
+    pub trait Integer
+    where
+        Self: num_integer::Integer,
+        Self: std::ops::Shr<Self, Output = Self>,
+        Self: std::ops::ShrAssign,
+        Self: std::ops::SubAssign,
+    {
+}
+
+    impl<T> Integer for T
+    where
+        T: num_integer::Integer,
+        T: std::ops::Shr<T, Output = T>,
+        T: std::ops::ShrAssign,
+        T: std::ops::SubAssign,
+    {
+    }
+
+    pub trait EuclidianDomain
+    where
+        Self: num_traits::Num,
+        Self: Clone,
+    {
+}
+
+    impl<T> EuclidianDomain for T
+    where
+        T: num_traits::Num,
+        Self: Clone,
+    {
+    }
+
+    pub trait Transformation
+    where
+        Self: Fn(usize) -> usize,
+    {
+}
+
+    impl<T> Transformation for T
+    where
+        T: Fn(usize) -> usize,
+    {
+    }
+
+    type DifferenceType = usize;
+
+    fn odd<N>(n: &N) -> bool
+    where
+        N: Integer,
+    {
+        n.is_odd()
+    }
+
+    fn _half<N>(n: N) -> N
+    where
+        N: Integer,
+    {
+        n >> num_traits::one()
+    }
 
     // Section 11.1
 
@@ -158,8 +158,8 @@ pub mod fmgp {
     // ValueType<I0> == ValueType<I1>
     pub fn swap_ranges<'a, I0, I1, T>(first0: I0, mut first1: I1) -> I1
     where
-        I0: ::InputIterator<Item = &'a mut T>,
-        I1: ::InputIterator<Item = I0::Item>,
+        I0: InputIterator<Item = &'a mut T>,
+        I1: InputIterator<Item = I0::Item>,
         T: 'a,
     {
         for x in first0 {
@@ -170,8 +170,8 @@ pub mod fmgp {
 
     pub fn swap_ranges_bounded<'a, I0, I1, T>(mut first0: I0, mut first1: I1) -> (I0, I1)
     where
-        I0: ::InputIterator<Item = &'a mut T>,
-        I1: ::InputIterator<Item = I0::Item>,
+        I0: InputIterator<Item = &'a mut T>,
+        I1: InputIterator<Item = I0::Item>,
         T: 'a,
     {
         while let Some(x) = first0.next() {
@@ -185,14 +185,14 @@ pub mod fmgp {
 
     pub fn swap_ranges_n<'a, I0, I1, T, N>(mut first0: I0, mut first1: I1, mut n: N) -> (I0, I1)
     where
-        I0: ::InputIterator<Item = &'a mut T>,
-        I1: ::InputIterator<Item = I0::Item>,
+        I0: InputIterator<Item = &'a mut T>,
+        I1: InputIterator<Item = I0::Item>,
         T: 'a,
-        N: ::Integer,
+        N: Integer,
     {
-        while n != ::ch11::num_traits::zero() {
+        while n != num_traits::zero() {
             swap(first0.next().unwrap(), first1.next().unwrap());
-            n -= ::ch11::num_traits::one();
+            n -= num_traits::one();
         }
         (first0, first1)
     }
@@ -273,7 +273,7 @@ pub mod fmgp {
     fn rotate_cycle_from<T, F>(slice: &mut [T], mut i: usize, from: F)
     where
         T: Clone,
-        F: ::Transformation,
+        F: Transformation,
     {
         let tmp = slice[i].clone();
         let start = i;
@@ -288,7 +288,7 @@ pub mod fmgp {
 
     #[derive(Copy, Clone)]
     struct RotateTransform {
-        plus: ::ch11::DifferenceType,
+        plus: DifferenceType,
         minus: isize,
         m1: usize,
     }
@@ -315,9 +315,9 @@ pub mod fmgp {
 
     fn gcd<E>(mut a: E, mut b: E) -> E
     where
-        E: ::EuclidianDomain,
+        E: EuclidianDomain,
     {
-        while b != ::ch11::num_traits::zero() {
+        while b != num_traits::zero() {
             a = a % b.clone();
             swap(&mut a, &mut b);
         }
@@ -348,7 +348,7 @@ pub mod fmgp {
 
     fn _reverse_bidirectional<I>(mut f: I)
     where
-        I: ::BidirectionalIterator,
+        I: BidirectionalIterator,
     {
         loop {
             let mut x = f.next();
@@ -365,20 +365,20 @@ pub mod fmgp {
 
     pub fn reverse_n<'a, T, I, N>(mut f: I, mut n: N)
     where
-        I: ::BidirectionalIterator<Item = &'a mut T>,
+        I: BidirectionalIterator<Item = &'a mut T>,
         T: 'a,
-        N: ::Integer,
+        N: Integer,
     {
-        n >>= ::ch11::num_traits::one();
-        while n > ::ch11::num_traits::zero() {
-            n -= ::ch11::num_traits::one();
+        n >>= num_traits::one();
+        while n > num_traits::zero() {
+            n -= num_traits::one();
             swap(f.next().unwrap(), f.next_back().unwrap());
         }
     }
 
     pub fn _reverse_random_access<'a, T, I>(f: I)
     where
-        I: ::RandomAccessIterator<Item = &'a mut T>,
+        I: RandomAccessIterator<Item = &'a mut T>,
         T: 'a,
     {
         let n = f.len();
@@ -423,7 +423,7 @@ pub mod fmgp {
         }
         let h = n >> 1;
         let mut m = reverse_recursive(slice, f, h);
-        if ::ch11::odd(&n) {
+        if odd(&n) {
             m += 1;
         }
         let last = reverse_recursive(slice, m, h);
@@ -445,8 +445,8 @@ pub mod fmgp {
     where
         T: Clone,
         T: 'a,
-        I: ::BidirectionalIterator<Item = &'a T>,
-        O: ::OutputIterator<Item = &'a mut T>,
+        I: BidirectionalIterator<Item = &'a T>,
+        O: OutputIterator<Item = &'a mut T>,
     {
         while let Some(x) = l.next_back() {
             *result.next().unwrap() = x.clone();
@@ -458,13 +458,13 @@ pub mod fmgp {
     where
         T: Clone,
         T: 'a,
-        I: ::InputIterator<Item = &'a T>,
-        N: ::Integer,
-        O: ::OutputIterator<Item = &'a mut T>,
+        I: InputIterator<Item = &'a T>,
+        N: Integer,
+        O: OutputIterator<Item = &'a mut T>,
     {
-        while n != ::ch11::num_traits::zero() {
+        while n != num_traits::zero() {
             *result.next().unwrap() = first.next().unwrap().clone();
-            n -= ::ch11::num_traits::one();
+            n -= num_traits::one();
         }
         result
     }
@@ -472,7 +472,7 @@ pub mod fmgp {
     fn reverse_n_with_buffer<T, N>(slice: &mut [T], f: usize, n: N, buffer: &mut [T])
     where
         T: Clone,
-        N: ::Integer,
+        N: Integer,
     {
         copy_n(slice[f..].iter(), n, buffer.iter_mut());
         reverse_copy(buffer.iter(), slice[f..].iter_mut());
