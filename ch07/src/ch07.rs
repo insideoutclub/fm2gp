@@ -258,7 +258,7 @@ where
 impl<T> MultiplicativeSemigroup for T
 where
     T: Regular,
-    T: std::ops::Mul<Output = T>,
+    for<'a, 'b> &'a T: std::ops::Mul<&'b T, Output = T>,
 {
 }
 
@@ -363,7 +363,6 @@ pub struct Plus();
 impl<A> SemigroupOperation<A> for Plus
 where
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
-    A: Regular,
 {
     fn call(&self, x: &A, y: &A) -> A {
         x + y
@@ -374,7 +373,6 @@ impl<T> MonoidOperation<T> for Plus
 where
     Self: SemigroupOperation<T>,
     T: num_traits::Zero,
-    T: Regular,
 {
     fn identity_element(&self) -> T {
         num_traits::zero()
@@ -386,7 +384,6 @@ pub struct _Multiplies();
 impl<A> SemigroupOperation<A> for _Multiplies
 where
     for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
-    A: Regular,
 {
     fn call(&self, x: &A, y: &A) -> A {
         x * y
@@ -397,7 +394,6 @@ impl<T> MonoidOperation<T> for _Multiplies
 where
     Self: SemigroupOperation<T>,
     T: num_traits::One,
-    T: Regular,
 {
     fn identity_element(&self) -> T {
         num_traits::one()
