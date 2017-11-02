@@ -27,13 +27,27 @@ pub trait NoncommutativeAdditiveMonoid
 where
     Self: NoncommutativeAdditiveSemigroup,
     Self: num_traits::Zero,
+    for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
 {
+    // Section 7.4
+
+    fn multiply_monoid<N>(self, n: N) -> Self
+    where
+        N: Integer,
+    {
+        // precondition(n >= 0);
+        if n == num_traits::zero() {
+            return num_traits::zero();
+        }
+        self.multiply_semigroup(n)
+    }
 }
 
 impl<T> NoncommutativeAdditiveMonoid for T
 where
     T: NoncommutativeAdditiveSemigroup,
     T: num_traits::Zero,
+    for<'a, 'b> &'a T: std::ops::Add<&'b T, Output = T>,
 {
 }
 
@@ -41,13 +55,25 @@ pub trait NoncommutativeAdditiveGroup
 where
     Self: NoncommutativeAdditiveMonoid,
     Self: std::ops::Neg<Output = Self>,
+    for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
 {
+    fn multiply_group<N>(mut self, mut n: N) -> Self
+    where
+        N: Integer,
+    {
+        if n < num_traits::zero() {
+            n = -n;
+            self = -self;
+        }
+        self.multiply_monoid(n)
+    }
 }
 
 impl<T> NoncommutativeAdditiveGroup for T
 where
     T: NoncommutativeAdditiveMonoid,
     T: std::ops::Neg<Output = T>,
+    for<'a, 'b> &'a T: std::ops::Add<&'b T, Output = T>,
 {
 }
 
@@ -81,24 +107,21 @@ where
 
 pub trait Regular
 where
-    Self: Clone,
-    Self: std::cmp::PartialEq,
+    Self: Sized,
 {
 }
 
 impl<T> Regular for T
 where
-    T: Clone,
-    T: std::cmp::PartialEq,
+    T: Sized,
 {
 }
 
 pub trait SemigroupOperation<A> {
-    fn call(&self, A, A) -> A;
+    fn call(&self, &A, &A) -> A;
 
     fn power_accumulate_semigroup<N>(&self, mut r: A, mut a: A, mut n: N) -> A
     where
-        A: Regular,
         N: Integer,
     {
         // precondition(n >= 0);
@@ -106,35 +129,31 @@ pub trait SemigroupOperation<A> {
             return r;
         }
         loop {
-            if odd(&n) {
-                r = self.call(r, a.clone());
+            if n.odd() {
+                r = self.call(&r, &a);
                 if n == num_traits::one() {
                     return r;
                 }
             }
-            n = half(n);
-            a = self.call(a.clone(), a);
+            n = n.half();
+            a = self.call(&a, &a);
         }
     }
 
     fn power_semigroup<N>(&self, mut a: A, mut n: N) -> A
     where
-        A: Regular,
         N: Integer,
     {
         // precondition(n > 0);
-        while !odd(&n) {
-            a = self.call(a.clone(), a);
-            n = half(n);
+        while !n.odd() {
+            a = self.call(&a, &a);
+            n = n.half();
         }
         if n == num_traits::one() {
             return a;
         }
-        self.power_accumulate_semigroup(
-            a.clone(),
-            self.call(a.clone(), a),
-            half(n - num_traits::one()),
-        )
+        let a_squared = self.call(&a, &a);
+        self.power_accumulate_semigroup(a, a_squared, (n - num_traits::one()).half())
     }
 }
 
@@ -146,7 +165,6 @@ where
 
     fn power_monoid<N>(&self, a: A, n: N) -> A
     where
-        A: Regular,
         N: Integer,
     {
         // precondition(n >= 0);
@@ -165,7 +183,6 @@ where
 
     fn power_group<N>(&self, mut a: A, mut n: N) -> A
     where
-        A: Regular,
         N: Integer,
     {
         if n < num_traits::zero() {
@@ -179,12 +196,14 @@ where
 pub trait AdditiveGroup
 where
     Self: NoncommutativeAdditiveGroup,
+    for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
 {
 }
 
 impl<T> AdditiveGroup for T
 where
     T: NoncommutativeAdditiveGroup,
+    for<'a, 'b> &'a T: std::ops::Add<&'b T, Output = T>,
 {
 }
 
@@ -208,6 +227,13 @@ where
     Self: num_traits::Signed,
     Self: std::ops::Shr<Self, Output = Self>,
 {
+    fn odd(&self) -> bool {
+        self.is_odd()
+    }
+
+    fn half(self) -> Self {
+        self >> num_traits::one()
+    }
 }
 
 impl<T> Integer for T
@@ -220,48 +246,33 @@ where
 
 // Section 7.1
 
-fn odd<N>(n: &N) -> bool
-where
-    N: Integer,
-{
-    n.is_odd()
-}
-
-fn half<N>(n: N) -> N
-where
-    N: Integer,
-{
-    n >> num_traits::one()
-}
-
 pub fn mult_acc4(mut r: i32, mut n: i32, mut a: i32) -> i32 {
     loop {
-        if odd(&n) {
+        if n.odd() {
             r += a;
             if n == 1 {
                 return r;
             }
         }
-        n = half(n);
+        n = n.half();
         a += a;
     }
 }
 
 pub fn multiply_accumulate0<A, N>(mut r: A, mut n: N, mut a: A) -> A
 where
-    A: Clone,
-    A: std::ops::Add<Output = A>,
+    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
     N: Integer,
 {
     loop {
-        if odd(&n) {
-            r = r + a.clone();
+        if n.odd() {
+            r = &r + &a;
             if n == num_traits::one() {
                 return r;
             }
         }
-        n = half(n);
-        a = a.clone() + a;
+        n = n.half();
+        a = &a + &a;
     }
 }
 
@@ -270,97 +281,65 @@ where
 pub trait NoncommutativeAdditiveSemigroup
 where
     Self: Regular,
-    Self: std::ops::Add<Output = Self>,
+    for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
 {
+    fn multiply_accumulate<N>(mut self, mut r: Self, mut n: N) -> Self
+    where
+        N: Integer,
+    {
+        loop {
+            if n.odd() {
+                r = &r + &self;
+                if n == num_traits::one() {
+                    return r;
+                }
+            }
+            n = n.half();
+            self = &self + &self;
+        }
+    }
+
+    fn multiply_accumulate_semigroup<N>(mut self, mut r: Self, mut n: N) -> Self
+    where
+        N: Integer,
+    {
+        // precondition(n >= 0);
+        if n == num_traits::zero() {
+            return r;
+        }
+        loop {
+            if n.odd() {
+                r = &r + &self;
+                if n == num_traits::one() {
+                    return r;
+                }
+            }
+            n = n.half();
+            self = &self + &self;
+        }
+    }
+
+    fn multiply_semigroup<N>(mut self, mut n: N) -> Self
+    where
+        N: Integer,
+    {
+        // precondition(n > 0);
+        while !n.odd() {
+            self = &self + &self;
+            n = n.half();
+        }
+        if n == num_traits::one() {
+            return self;
+        }
+        (&self + &self).multiply_accumulate_semigroup(self, (n - num_traits::one()).half())
+    }
 }
 
 impl<T> NoncommutativeAdditiveSemigroup for T
 where
     T: Regular,
-    T: std::ops::Add<Output = Self>,
+    for<'a, 'b> &'a T: std::ops::Add<&'b T, Output = Self>,
 {
-}
-
-pub fn multiply_accumulate<A, N>(mut r: A, mut n: N, mut a: A) -> A
-where
-    A: NoncommutativeAdditiveSemigroup,
-    N: Integer,
-{
-    loop {
-        if odd(&n) {
-            r = r + a.clone();
-            if n == num_traits::one() {
-                return r;
-            }
-        }
-        n = half(n);
-        a = a.clone() + a;
-    }
-}
-
-
-pub fn multiply_accumulate_semigroup<A, N>(mut r: A, mut n: N, mut a: A) -> A
-where
-    A: NoncommutativeAdditiveSemigroup,
-    N: Integer,
-{
-    // precondition(n >= 0);
-    if n == num_traits::zero() {
-        return r;
-    }
-    loop {
-        if odd(&n) {
-            r = r + a.clone();
-            if n == num_traits::one() {
-                return r;
-            }
-        }
-        n = half(n);
-        a = a.clone() + a;
-    }
-}
-
-pub fn multiply_semigroup<A, N>(mut n: N, mut a: A) -> A
-where
-    A: NoncommutativeAdditiveSemigroup,
-    N: Integer,
-{
-    // precondition(n > 0);
-    while !odd(&n) {
-        a = a.clone() + a;
-        n = half(n);
-    }
-    if n == num_traits::one() {
-        return a;
-    }
-    multiply_accumulate_semigroup(a.clone(), half(n - num_traits::one()), a.clone() + a)
-}
-
-
-// Section 7.4
-
-pub fn multiply_monoid<A, N>(n: N, a: A) -> A
-where
-    A: NoncommutativeAdditiveMonoid,
-    N: Integer,
-{
-    // precondition(n >= 0);
-    if n == num_traits::zero() {
-        return num_traits::zero();
-    }
-    multiply_semigroup(n, a)
-}
-
-pub fn multiply_group<A, N>(mut n: N, mut a: A) -> A
-where
-    A: NoncommutativeAdditiveGroup,
-    N: Integer,
-{
-    if n < num_traits::zero() {
-        n = -n;
-        a = -a;
-    }
-    multiply_monoid(n, a)
 }
 
 // Section 7.5
@@ -369,20 +348,21 @@ pub fn power_accumulate_semigroup<A, N>(mut r: A, mut a: A, mut n: N) -> A
 where
     A: MultiplicativeSemigroup,
     N: Integer,
+    for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
 {
     // precondition(n >= 0);
     if n == num_traits::zero() {
         return r;
     }
     loop {
-        if odd(&n) {
-            r = r * a.clone();
+        if n.odd() {
+            r = &r * &a;
             if n == num_traits::one() {
                 return r;
             }
         }
-        n = half(n);
-        a = a.clone() * a;
+        n = n.half();
+        a = &a * &a;
     }
 }
 
@@ -390,22 +370,25 @@ pub fn power_semigroup<A, N>(mut a: A, mut n: N) -> A
 where
     A: MultiplicativeSemigroup,
     N: Integer,
+    for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
 {
     // precondition(n > 0);
-    while !odd(&n) {
-        a = a.clone() * a;
-        n = half(n);
+    while !n.odd() {
+        a = &a * &a;
+        n = n.half();
     }
     if n == num_traits::one() {
         return a;
     }
-    power_accumulate_semigroup(a.clone(), a.clone() * a, half(n - num_traits::one()))
+    let a_squared = &a * &a;
+    power_accumulate_semigroup(a, a_squared, (n - num_traits::one()).half())
 }
 
 pub fn power_monoid<A, N>(a: A, n: N) -> A
 where
     A: MultiplicativeMonoid,
     N: Integer,
+    for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
 {
     // precondition(n >= 0);
     if n == num_traits::zero() {
@@ -425,6 +408,7 @@ pub fn power_group<A, N>(mut a: A, mut n: N) -> A
 where
     A: MultiplicativeGroup,
     N: Integer,
+    for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
 {
     if n < num_traits::zero() {
         n = -n;
@@ -439,9 +423,10 @@ pub struct Plus();
 
 impl<A> SemigroupOperation<A> for Plus
 where
-    A: std::ops::Add<Output = A>,
+    for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
+    A: Regular,
 {
-    fn call(&self, x: A, y: A) -> A {
+    fn call(&self, x: &A, y: &A) -> A {
         x + y
     }
 }
@@ -450,9 +435,10 @@ pub struct _Multiplies();
 
 impl<A> SemigroupOperation<A> for _Multiplies
 where
-    A: std::ops::Mul<Output = A>,
+    for<'a, 'b> &'a A: std::ops::Mul<&'b A, Output = A>,
+    A: Regular,
 {
-    fn call(&self, x: A, y: A) -> A {
+    fn call(&self, x: &A, y: &A) -> A {
         x * y
     }
 }
@@ -461,6 +447,7 @@ impl<T> MonoidOperation<T> for Plus
 where
     Self: SemigroupOperation<T>,
     T: num_traits::Zero,
+    T: Regular,
 {
     fn identity_element(&self) -> T {
         num_traits::zero()
@@ -471,6 +458,7 @@ impl<T> MonoidOperation<T> for _Multiplies
 where
     Self: SemigroupOperation<T>,
     T: num_traits::One,
+    T: Regular,
 {
     fn identity_element(&self) -> T {
         num_traits::one()
@@ -481,6 +469,7 @@ impl<T> GroupOperation<T> for Plus
 where
     Self: MonoidOperation<T>,
     T: AdditiveGroup,
+    for<'a, 'b> &'a T: std::ops::Add<&'b T, Output = T>,
 {
     fn inverse_operation(&self, x: T) -> T {
         -x

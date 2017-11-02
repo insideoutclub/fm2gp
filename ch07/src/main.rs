@@ -30,15 +30,15 @@ fn main() {
     );
     println!(
         "multiply_accumulate(0, 7, 8) = {}",
-        multiply_accumulate(0, 7, 8)
+        8.multiply_accumulate(0, 7)
     );
     println!(
         "multiply_accumulate_semigroup(0, 7, 8) = {}",
-        multiply_accumulate_semigroup(0, 7, 8)
+        8.multiply_accumulate_semigroup(0, 7)
     );
-    println!("multiply_semigroup(7, 8) = {}", multiply_semigroup(7, 8));
-    println!("multiply_monoid(7, 8) = {}", multiply_monoid(7, 8));
-    println!("multiply_group(7, 8) = {}", multiply_group(7, 8));
+    println!("multiply_semigroup(7, 8) = {}", 8.multiply_semigroup(7));
+    println!("multiply_monoid(7, 8) = {}", 8.multiply_monoid(7));
+    println!("multiply_group(7, 8) = {}", 8.multiply_group(7));
     println!(
         "power_accumulate_semigroup(1, 2, 10) = {}",
         power_accumulate_semigroup(1, 2, 10)
