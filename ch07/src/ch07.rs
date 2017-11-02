@@ -96,11 +96,11 @@ where
 pub trait NoncommutativeAdditiveSemigroup
 where
     Self: Regular,
-    for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
 {
     fn multiply_accumulate<N>(mut self, mut r: Self, mut n: N) -> Self
     where
         N: Integer,
+        for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
     {
         loop {
             if n.odd() {
@@ -117,6 +117,7 @@ where
     fn multiply_accumulate_semigroup<N>(mut self, mut r: Self, mut n: N) -> Self
     where
         N: Integer,
+        for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
     {
         // precondition(n >= 0);
         if n == num_traits::zero() {
@@ -137,6 +138,7 @@ where
     fn multiply_semigroup<N>(mut self, mut n: N) -> Self
     where
         N: Integer,
+        for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
     {
         // precondition(n > 0);
         while !n.odd() {
@@ -153,7 +155,6 @@ where
 impl<T> NoncommutativeAdditiveSemigroup for T
 where
     T: Regular,
-    for<'a, 'b> &'a T: std::ops::Add<&'b T, Output = Self>,
 {
 }
 
@@ -164,11 +165,11 @@ pub trait NoncommutativeAdditiveMonoid
 where
     Self: NoncommutativeAdditiveSemigroup,
     Self: num_traits::Zero,
-    for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
 {
     fn multiply_monoid<N>(self, n: N) -> Self
     where
         N: Integer,
+        for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
     {
         // precondition(n >= 0);
         if n == num_traits::zero() {
@@ -182,7 +183,6 @@ impl<T> NoncommutativeAdditiveMonoid for T
 where
     T: NoncommutativeAdditiveSemigroup,
     T: num_traits::Zero,
-    for<'a, 'b> &'a T: std::ops::Add<&'b T, Output = T>,
 {
 }
 
@@ -190,11 +190,11 @@ pub trait NoncommutativeAdditiveGroup
 where
     Self: NoncommutativeAdditiveMonoid,
     Self: std::ops::Neg<Output = Self>,
-    for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
 {
     fn multiply_group<N>(mut self, mut n: N) -> Self
     where
         N: Integer,
+        for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
     {
         if n < num_traits::zero() {
             n = -n;
@@ -208,7 +208,6 @@ impl<T> NoncommutativeAdditiveGroup for T
 where
     T: NoncommutativeAdditiveMonoid,
     T: std::ops::Neg<Output = T>,
-    for<'a, 'b> &'a T: std::ops::Add<&'b T, Output = T>,
 {
 }
 
@@ -217,7 +216,6 @@ where
 pub trait MultiplicativeSemigroup
 where
     Self: Regular,
-    Self: std::ops::Mul<Output = Self>,
 {
     fn power_accumulate_semigroup<N>(mut self, mut r: Self, mut n: N) -> Self
     where
@@ -427,14 +425,12 @@ where
 pub trait AdditiveGroup
 where
     Self: NoncommutativeAdditiveGroup,
-    for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
 {
 }
 
 impl<T> AdditiveGroup for T
 where
     T: NoncommutativeAdditiveGroup,
-    for<'a, 'b> &'a T: std::ops::Add<&'b T, Output = T>,
 {
 }
 
@@ -442,7 +438,6 @@ impl<T> GroupOperation<T> for Plus
 where
     Self: MonoidOperation<T>,
     T: AdditiveGroup,
-    for<'a, 'b> &'a T: std::ops::Add<&'b T, Output = T>,
 {
     fn inverse_operation(&self, x: T) -> T {
         -x
