@@ -166,7 +166,7 @@ pub mod fmgp {
         T: 'a,
     {
         index: usize,
-        slice: &'a [T],
+        slice: Option<&'a [T]>,
     }
 
     impl<'a, T> PartialEq for SliceAdapter<'a, T> {
@@ -176,13 +176,13 @@ pub mod fmgp {
     }
 
     pub fn begin_random_access<'a, T>(slice: &'a [T]) -> SliceAdapter<'a, T> {
-        SliceAdapter { index: 0, slice }
+        SliceAdapter { index: 0, slice: Some(slice) }
     }
 
     pub fn end_random_access<'a, T>(slice: &'a [T]) -> SliceAdapter<'a, T> {
         SliceAdapter {
             index: slice.len(),
-            slice,
+            slice: None,
         }
     }
 
@@ -196,7 +196,7 @@ pub mod fmgp {
     impl<'a, T> std::ops::Deref for SliceAdapter<'a, T> {
         type Target = T;
         fn deref(&self) -> &Self::Target {
-            &self.slice[self.index]
+            &self.slice.unwrap()[self.index]
         }
     }
 
