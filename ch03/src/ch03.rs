@@ -46,7 +46,7 @@ where
 
 pub fn sift0(first: &mut [bool]) {
     let n = first.len();
-    fill(first.iter_mut(), true);
+    fill(&mut first[..], true);
     let mut i = 0;
     let mut index_square = 3;
     while index_square < n {
@@ -62,7 +62,7 @@ pub fn sift0(first: &mut [bool]) {
 
 pub fn sift1(first: &mut [bool]) {
     let n = first.len();
-    fill(first.iter_mut(), true);
+    fill(&mut first[..], true);
     let mut i = 0;
     let mut index_square = 3;
     let mut factor = 3;
@@ -79,7 +79,7 @@ pub fn sift1(first: &mut [bool]) {
 
 pub fn sift(first: &mut [bool]) {
     let n = first.len();
-    fill(first.iter_mut(), true);
+    fill(&mut first[..], true);
     let mut i = 0;
     let mut index_square = 3;
     let mut factor = 3;
