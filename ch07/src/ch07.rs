@@ -19,7 +19,6 @@
 // ch07.rs -- Functions from Chapter 7 of fM2GP.
 // -------------------------------------------------------------------
 
-extern crate num_integer;
 extern crate num_traits;
 extern crate std;
 
@@ -39,12 +38,17 @@ where
 
 pub trait Integer
 where
-    Self: num_integer::Integer,
-    Self: num_traits::Signed,
+    Self: Regular,
+    Self: std::cmp::PartialOrd,
+    Self: num_traits::One,
+    Self: num_traits::Zero,
     Self: std::ops::Shr<Self, Output = Self>,
+    Self: std::ops::Sub<Output = Self>,
+    Self: std::ops::Neg<Output = Self>,
+    for<'a> &'a Self: std::ops::BitAnd<Self, Output = Self>,
 {
     fn odd(&self) -> bool {
-        self.is_odd()
+        self & num_traits::one() == num_traits::one()
     }
 
     fn half(self) -> Self {
@@ -54,9 +58,14 @@ where
 
 impl<T> Integer for T
 where
-    T: num_integer::Integer,
-    T: num_traits::Signed,
+    T: Regular,
+    T: std::cmp::PartialOrd,
+    T: num_traits::One,
+    T: num_traits::Zero,
     T: std::ops::Shr<T, Output = T>,
+    T: std::ops::Sub<Output = T>,
+    T: std::ops::Neg<Output = T>,
+    for<'a> &'a Self: std::ops::BitAnd<Self, Output = Self>,
 {
 }
 
@@ -77,6 +86,7 @@ pub fn multiply_accumulate0<A, N>(mut r: A, mut n: N, mut a: A) -> A
 where
     for<'a, 'b> &'a A: std::ops::Add<&'b A, Output = A>,
     N: Integer,
+    for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
 {
     loop {
         if n.odd() {
@@ -100,6 +110,7 @@ where
     fn multiply_accumulate<N>(mut self, mut r: Self, mut n: N) -> Self
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
         for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
     {
         loop {
@@ -117,6 +128,7 @@ where
     fn multiply_accumulate_semigroup<N>(mut self, mut r: Self, mut n: N) -> Self
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
         for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
     {
         // precondition(n >= 0);
@@ -138,6 +150,7 @@ where
     fn multiply_semigroup<N>(mut self, mut n: N) -> Self
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
         for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
     {
         // precondition(n > 0);
@@ -169,6 +182,7 @@ where
     fn multiply_monoid<N>(self, n: N) -> Self
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
         for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
     {
         // precondition(n >= 0);
@@ -194,6 +208,7 @@ where
     fn multiply_group<N>(mut self, mut n: N) -> Self
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
         for<'a, 'b> &'a Self: std::ops::Add<&'b Self, Output = Self>,
     {
         if n < num_traits::zero() {
@@ -220,6 +235,7 @@ where
     fn power_accumulate_semigroup<N>(mut self, mut r: Self, mut n: N) -> Self
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
         for<'a, 'b> &'a Self: std::ops::Mul<&'b Self, Output = Self>,
     {
         // precondition(n >= 0);
@@ -241,6 +257,7 @@ where
     fn power_semigroup<N>(mut self, mut n: N) -> Self
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
         for<'a, 'b> &'a Self: std::ops::Mul<&'b Self, Output = Self>,
     {
         // precondition(n > 0);
@@ -270,6 +287,7 @@ where
     fn power_monoid<N>(self, n: N) -> Self
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
         for<'a, 'b> &'a Self: std::ops::Mul<&'b Self, Output = Self>,
     {
         // precondition(n >= 0);
@@ -299,6 +317,7 @@ where
     fn power_group<N>(mut self, mut n: N) -> Self
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
         for<'a, 'b> &'a Self: std::ops::Mul<&'b Self, Output = Self>,
     {
         if n < num_traits::zero() {
@@ -324,6 +343,7 @@ pub trait SemigroupOperation<A> {
     fn power_accumulate_semigroup<N>(&self, mut r: A, mut a: A, mut n: N) -> A
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
     {
         // precondition(n >= 0);
         if n == num_traits::zero() {
@@ -344,6 +364,7 @@ pub trait SemigroupOperation<A> {
     fn power_semigroup<N>(&self, mut a: A, mut n: N) -> A
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
     {
         // precondition(n > 0);
         while !n.odd() {
@@ -409,6 +430,7 @@ where
     fn power_monoid<N>(&self, a: A, n: N) -> A
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
     {
         // precondition(n >= 0);
         if n == num_traits::zero() {
@@ -466,6 +488,7 @@ where
     fn power_group<N>(&self, mut a: A, mut n: N) -> A
     where
         N: Integer,
+        for<'a> &'a N: std::ops::BitAnd<N, Output = N>,
     {
         if n < num_traits::zero() {
             n = -n;
