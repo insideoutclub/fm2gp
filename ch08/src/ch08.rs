@@ -29,20 +29,13 @@ where
     I: IntoIterator<Item = &'a R>,
     R: 'a,
     R: num_traits::Zero,
-    R: Clone,
     R: std::ops::MulAssign<&'a R>,
     R: std::ops::AddAssign<&'a R>,
 {
-    let mut iter = first.into_iter();
-    match iter.next() {
-        None => num_traits::zero(),
-        Some(y) => {
-            let mut sum = y.clone();
-            for first in iter {
-                sum *= x;
-                sum += first;
-            }
-            sum
-        }
+    let mut sum = num_traits::zero();
+    for y in first {
+        sum *= x;
+        sum += y;
     }
+    sum
 }
