@@ -22,18 +22,15 @@
 mod ch03;
 use ch03::*;
 
-fn print_sieve<'a, I>(into_iterator: I, n: Integer)
+fn print_sieve<'a, I>(first: I)
 where
     I: IntoIterator<Item = &'a bool>,
 {
-    let mut first = into_iterator.into_iter();
-    let mut i = 0;
     print!("2");
-    while i < n {
-        if *first.next().unwrap() {
+    for (i, x) in first.into_iter().enumerate() {
+        if *x {
             print!(" {}", 2 * i + 3);
         }
-        i += 1;
     }
     println!();
 }
@@ -42,12 +39,12 @@ fn main() {
     let mut v = vec![false; 500];
     sift0(&mut v[..50]);
     println!("sift0(begin(v), 50):");
-    print_sieve(&v, 50);
+    print_sieve(&v[..50]);
     sift1(&mut v[..50]);
     println!("sift1(begin(v), 50):");
-    print_sieve(&v, 50);
+    print_sieve(&v[..50]);
     sift(&mut v);
     println!("sift(begin(v), 500):");
-    print_sieve(&v, 500);
+    print_sieve(&v);
     println!("gcm(15, 9) = {}", gcm(15, 9));
 }
