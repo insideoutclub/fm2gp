@@ -24,8 +24,5 @@ use ch08::*;
 
 fn main() {
     let poly = [1., 2., 1.];
-    println!(
-        "polynomial_value(...) = {}",
-        polynomial_value(poly.iter().cloned(), &1.)
-    );
+    println!("polynomial_value(...) = {}", polynomial_value(&poly, &1.));
 }
